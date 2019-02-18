@@ -10,7 +10,7 @@ class FieldDrawer(private val resources: Resources) {
     fun drawField(field: Field, canvas: Canvas) {
         val cellWidth = canvas.width / field.w
 
-        for ((x, col) in field.field.withIndex()) for ((y, cell) in col.withIndex()) {
+        for ((x, y, cell) in field.withCoordinates()) {
             val bm = cell.toBitmap()
             val src = Rect(0, 0, bm.width, bm.height)
             val dst = Rect(x * cellWidth, y * cellWidth, (x + 1) * cellWidth, (y + 1) * cellWidth)

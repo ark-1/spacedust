@@ -46,7 +46,7 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
             }
 
             val timeMillis = (System.nanoTime() - startTime) / 1_000_000
-            val waitTime = targetTime - timeMillis
+            val waitTime = targetTimeMillis - timeMillis
 
             catchPrint {
                 sleep(waitTime.coerceAtLeast(0))
@@ -55,7 +55,7 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
     }
 
     companion object {
-        private const val targetFps = 50
-        private const val targetTime = 1000L / targetFps
+        private const val targetFps = 20
+        private const val targetTimeMillis = 1000L / targetFps
     }
 }
