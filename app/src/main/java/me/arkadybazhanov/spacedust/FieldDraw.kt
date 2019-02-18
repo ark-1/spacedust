@@ -6,8 +6,8 @@ import me.arkadybazhanov.spacedust.R.drawable.*
 import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.Cell.*
 
-class FieldDrawer(private val resources: Resources) {
-    fun drawField(level: Level, canvas: Canvas) {
+class LevelDrawer(private val resources: Resources) {
+    fun drawLevel(level: Level, canvas: Canvas) {
         val cellWidth = canvas.width / level.w
 
         for ((x, y, cell) in level.withCoordinates()) {
@@ -18,8 +18,8 @@ class FieldDrawer(private val resources: Resources) {
         }
     }
 
-    private fun Cell.toBitmap() = when (this) {
+    private fun Cell.toBitmap() = (if (characters.isNotEmpty()) player else when (this) {
         is Air -> blue
-        is Stone -> white
-    }.let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
+        is Stone -> white.also { println("hwllo") }
+    }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
 }

@@ -3,8 +3,8 @@ package me.arkadybazhanov.spacedust.core
 sealed class Cell {
     val events = mutableListOf<Event>()
     val characters = mutableListOf<Character>()
-    object Stone : Cell()
-    object Air : Cell()
+    class Stone : Cell()
+    class Air : Cell()
 }
 
 data class Position(val x: Int, val y: Int) {

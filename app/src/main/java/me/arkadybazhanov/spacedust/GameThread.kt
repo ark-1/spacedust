@@ -42,6 +42,7 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
             val startTime = System.nanoTime()
 
             surfaceHolder.withCanvas { canvas ->
+
                 runBlocking {
                     gameView.update()
                 }

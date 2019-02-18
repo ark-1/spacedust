@@ -4,11 +4,18 @@ import java.util.*
 
 object Game {
     val characters = PriorityQueue<Pair<Int, Character>>()
-    val nextId = 0
+    private var nextId = 0
+    var time: Int = 0
+        private set
+
+    fun getNextId() = nextId++
 
     suspend fun update() {
-        val (time, nextCharacter) = characters.poll()
+        val (time, nextCharacter) = characters.poll() ?: error("Nothing to do :(")
+        this.time = time
         val newTime = time + nextCharacter.getCharacterMove().perform()
-        characters.add(newTime to nextCharacter)
+        characters += newTime to nextCharacter
     }
+
+
 }
