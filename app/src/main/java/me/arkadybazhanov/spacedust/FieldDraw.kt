@@ -7,10 +7,10 @@ import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.Cell.*
 
 class FieldDrawer(private val resources: Resources) {
-    fun drawField(field: Field, canvas: Canvas) {
-        val cellWidth = canvas.width / field.w
+    fun drawField(level: Level, canvas: Canvas) {
+        val cellWidth = canvas.width / level.w
 
-        for ((x, y, cell) in field.withCoordinates()) {
+        for ((x, y, cell) in level.withCoordinates()) {
             val bm = cell.toBitmap()
             val src = Rect(0, 0, bm.width, bm.height)
             val dst = Rect(x * cellWidth, y * cellWidth, (x + 1) * cellWidth, (y + 1) * cellWidth)

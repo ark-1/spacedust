@@ -14,13 +14,13 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
 
     private val thread = GameThread(holder, this)
     private val drawer = FieldDrawer(resources)
-    private val field = Field(Array(40) { x ->
+    private val field = Level(Array(40) { x ->
         Array(40) { y ->
             if (x % (y + 1) == 0) Cell.Stone else Cell.Air
         }
     })
 
-    private val game = Game()
+    private val game = Game
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         thread.setRunning(true)
@@ -39,7 +39,7 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
         }
     }
 
-    fun update() = game.update()
+    suspend fun update() = game.update()
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)

@@ -2,7 +2,7 @@ package me.arkadybazhanov.spacedust.core
 
 import java.util.*
 
-class Game {
+object Game {
     val characters = PriorityQueue<Pair<Int, Character>>()
     val nextId = 0
 

@@ -2,6 +2,7 @@ package me.arkadybazhanov.spacedust
 
 import android.graphics.*
 import android.view.*
+import kotlinx.coroutines.runBlocking
 
 inline fun catchPrint(block: () -> Unit) {
     try {
@@ -41,7 +42,9 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
             val startTime = System.nanoTime()
 
             surfaceHolder.withCanvas { canvas ->
-                gameView.update()
+                runBlocking {
+                    gameView.update()
+                }
                 gameView.draw(canvas)
             }
 
