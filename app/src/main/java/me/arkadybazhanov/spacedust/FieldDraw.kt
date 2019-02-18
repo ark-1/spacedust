@@ -20,6 +20,6 @@ class LevelDrawer(private val resources: Resources) {
 
     private fun Cell.toBitmap() = (if (characters.isNotEmpty()) player else when (this) {
         is Air -> blue
-        is Stone -> white.also { println("hwllo") }
+        is Stone -> white
     }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
 }

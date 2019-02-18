@@ -1,10 +1,13 @@
 package me.arkadybazhanov.spacedust.core
 
-fun generateLevel(character: Character): Level {
+fun generateLevelAndPut(character: Character): Level = generateLevelAndCreate { _, _ -> character }.first
+
+inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
     val (level, position) = generateLevel()
+    val character = characterSupplier(level, position)
     character.position = position
     character.level = level
-    return level
+    return level to character
 }
 
 fun generateLevel(): Pair<Level, Position> {

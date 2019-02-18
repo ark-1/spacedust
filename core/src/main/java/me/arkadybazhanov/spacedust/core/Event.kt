@@ -14,6 +14,7 @@ class Move(
     override val time: Int,
     val duration: Int
 ) : PerformableEvent {
+
     override fun perform(): Int {
         character.level[character.position].characters -= character
         character.position = to

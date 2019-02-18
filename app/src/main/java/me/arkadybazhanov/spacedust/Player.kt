@@ -13,15 +13,13 @@ class Player(override var level: Level, override var position: Position) : Chara
     override suspend fun getCharacterMove(): PerformableEvent {
 
         var pos: Position
-        do {
-            pos = position + when (random.nextInt(4)) {
-                0 -> Direction(0, -1)
-                1 -> Direction(-1, 0)
-                2 -> Direction(0, 1)
-                3 -> Direction(1, 0)
-                else -> throw IllegalStateException()
-            }
-        } while (pos.x !in 0..level.w || pos.y !in 0..level.h)
+        do pos = position + when (random.nextInt(4)) {
+            0 -> Direction(0, -1)
+            1 -> Direction(-1, 0)
+            2 -> Direction(0, 1)
+            3 -> Direction(1, 0)
+            else -> throw IllegalStateException()
+        } while (pos.x !in (0 until level.w) || pos.y !in (0 until level.h))
 
         delay(500)
 

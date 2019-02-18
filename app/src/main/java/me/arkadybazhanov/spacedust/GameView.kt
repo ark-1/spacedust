@@ -14,10 +14,8 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
 
     private val thread = GameThread(holder, this)
     private val drawer = LevelDrawer(resources)
-    private val player = run {
-        val (level, position) = generateLevel()
-        Player(level, position)
-    }
+
+    private val player = generateLevelAndCreate(::Player).second
 
     init {
         Game.characters += 0 to player
