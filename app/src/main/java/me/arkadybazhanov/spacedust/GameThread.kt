@@ -13,29 +13,19 @@ inline fun catchPrint(block: () -> Unit) {
 }
 
 inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
-    var canvas: Canvas? = null
+    val canvas: Canvas = lockCanvas() ?: error("Could not lock canvas")
 
-    catchPrint {
-        val c = lockCanvas() ?: error("Could not lock canvas")
-        canvas = c
+    try {
         synchronized(this) {
-            body(c)
+            body(canvas)
         }
-    }
-
-    if (canvas != null) {
-        catchPrint {
-            unlockCanvasAndPost(canvas)
-        }
+    } finally {
+        unlockCanvasAndPost(canvas)
     }
 }
 
 class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
-    private var running: Boolean = false
-
-    fun setRunning(isRunning: Boolean) {
-        running = isRunning
-    }
+    var running: Boolean = false
 
     override fun run() {
         while (running) {
@@ -46,15 +36,14 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
                 runBlocking {
                     gameView.update()
                 }
+
                 gameView.draw(canvas)
             }
 
             val timeMillis = (System.nanoTime() - startTime) / 1_000_000
             val waitTime = targetTimeMillis - timeMillis
 
-            catchPrint {
-                sleep(waitTime.coerceAtLeast(0))
-            }
+            sleep(waitTime.coerceAtLeast(0))
         }
     }
 

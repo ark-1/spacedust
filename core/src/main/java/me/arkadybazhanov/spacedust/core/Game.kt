@@ -16,6 +16,4 @@ object Game {
         val newTime = time + nextCharacter.getCharacterMove().perform()
         characters += newTime to nextCharacter
     }
-
-
 }
