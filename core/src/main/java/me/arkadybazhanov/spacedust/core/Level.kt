@@ -46,4 +46,5 @@ class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
 
 
     operator fun get(position: Position): Cell = cells[position.x][position.y]
+    operator fun get(x: Int, y: Int): Cell = cells[x][y]
 }
