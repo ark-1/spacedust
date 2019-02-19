@@ -3,7 +3,10 @@ package me.arkadybazhanov.spacedust.core
 import java.util.*
 
 object Game {
-    val characters = PriorityQueue<Pair<Int, Character>>()
+    val characters = PriorityQueue<Pair<Int, Character>>(
+        11,
+        compareBy({ it.first }, { it.second })
+    )
     private var nextId = 0
     var time: Int = 0
         private set

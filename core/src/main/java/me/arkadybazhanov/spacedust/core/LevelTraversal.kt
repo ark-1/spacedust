@@ -11,13 +11,16 @@ fun getNextMove(character: Character, destination: Position): Position {
     previousPositions[character.position] = character.position
     while (!bfs.isEmpty()) {
         val position = bfs.pollFirst()
-        for (direction in getListOfLegalDirections(character, position)) {
+        for (direction in getLegalDirections(character, position)) {
             if (!distances.containsKey(position + direction)) {
                 distances[position + direction] = distances[position]!! + 1
                 previousPositions[position + direction] = position
                 bfs.addLast(position + direction)
             }
         }
+    }
+    if (!distances.containsKey(destination)) {
+        return character.position
     }
     var position = destination
     while (previousPositions[position]!! != character.position) {
@@ -26,6 +29,6 @@ fun getNextMove(character: Character, destination: Position): Position {
     return position
 }
 
-fun getListOfLegalDirections(character: Character, position: Position): List<Direction> {
+fun getLegalDirections(character: Character, position: Position): List<Direction> {
     return character.directions.filter { it -> character.canMoveTo(position + it) }
 }
