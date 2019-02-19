@@ -18,7 +18,10 @@ class LevelDrawer(private val resources: Resources) {
         }
     }
 
-    private fun Cell.toBitmap() = (if (characters.isNotEmpty()) player else when (this) {
+    private fun Cell.toBitmap() = (if (characters.isNotEmpty()) when (characters[0]) {
+        is Player -> player
+        else -> monster
+    } else when (this) {
         is Air -> blue
         is Stone -> white
     }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")

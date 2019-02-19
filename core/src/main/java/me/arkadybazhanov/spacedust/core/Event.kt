@@ -22,3 +22,16 @@ class Move(
         return duration
     }
 }
+
+class Attack(
+    val attacker: Character,
+    val defender: Character,
+    override val time: Int,
+    val duration: Int
+) : PerformableEvent {
+
+    override fun perform(): Int {
+        TODO()
+        return duration
+    }
+}
