@@ -16,9 +16,9 @@ class Move(
 ) : PerformableEvent {
 
     override fun perform(): Int {
-        character.level[character.position].characters -= character
+        character.level[character.position].character = null
         character.position = to
-        character.level[character.position].characters += character
+        character.level[character.position].character = character
         return duration
     }
 }

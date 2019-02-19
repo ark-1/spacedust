@@ -14,3 +14,7 @@ interface Character : Comparable<Character> {
         return id.compareTo(other.id)
     }
 }
+
+fun Character.put() {
+    level[position].character = this
+}

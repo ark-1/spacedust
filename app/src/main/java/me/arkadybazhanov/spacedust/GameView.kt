@@ -46,7 +46,7 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        drawer.drawLevel(player.level, canvas)
+        drawer.drawLevel(LevelSnapshot(player.level), canvas)
     }
 
     fun tap(x: Float, y: Float) {

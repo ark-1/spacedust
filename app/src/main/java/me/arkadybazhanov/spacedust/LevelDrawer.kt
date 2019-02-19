@@ -7,7 +7,7 @@ import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.CellType.*
 
 class LevelDrawer(private val resources: Resources) {
-    fun drawLevel(level: Level, canvas: Canvas) {
+    fun drawLevel(level: LevelSnapshot, canvas: Canvas) {
         val cellWidth = canvas.width / level.w
 
         for ((x, y, cell) in level.withCoordinates()) {
@@ -18,8 +18,8 @@ class LevelDrawer(private val resources: Resources) {
         }
     }
 
-    private fun Cell.toBitmap() = (if (characters.isNotEmpty()) when (characters[0]) {
-        is Player -> player
+    private fun LevelSnapshot.CellSnapshot.toBitmap() = (if (characterType != null) when (characterType) {
+        Player::class -> player
         else -> monster
     } else when (type) {
         AIR -> blue

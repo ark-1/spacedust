@@ -6,15 +6,15 @@ class BasicMonster(override var level: Level, override var position: Position) :
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
                 && level[position].type == CellType.AIR
-                && level[position].characters.isEmpty()
+                && level[position].character == null
     }
 
     override val id: Int = Game.getNextId()
 
     override suspend fun getCharacterMove(): PerformableEvent {
         for ((position, cell) in level.withPosition()) {
-            if (!cell.characters.isEmpty() && position != this.position) {
-                return Move(this, getNextMoveToTarget(this, cell.characters[0]), Game.time, 1)
+            if (cell.character != null && position != this.position) {
+                return Move(this, getNextMoveToTarget(this, cell.character!!), Game.time, 1)
             }
         }
         return Move(this, position, Game.time, 1)
