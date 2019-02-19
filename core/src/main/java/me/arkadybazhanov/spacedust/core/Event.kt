@@ -31,7 +31,6 @@ class Attack(
 ) : PerformableEvent {
 
     override fun perform(): Int {
-        TODO()
         return duration
     }
 }

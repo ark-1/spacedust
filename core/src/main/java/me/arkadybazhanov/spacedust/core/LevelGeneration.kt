@@ -16,7 +16,7 @@ fun generateLevel(): Pair<Level, Position> {
             Cell(if (x % (y + 1) == 0) CellType.STONE else CellType.AIR)
         }
     })
-    val monster = BasicMonster(level, Position(8, 10))
+    val monster = BasicMonster(level, Position(8, 10), 1, 100, 10)
     Game.characters += 0 to monster
     return level to Position(1, 1)
 }
