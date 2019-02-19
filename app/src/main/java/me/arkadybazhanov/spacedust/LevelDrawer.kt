@@ -26,7 +26,7 @@ class LevelDrawer(private val resources: Resources) {
         STONE -> white
     }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
 
-    fun getCell(level: Level, canvasWidth: Int, x: Float, y: Float): Position {
+    fun getCell(level: LevelSnapshot, canvasWidth: Int, x: Float, y: Float): Position {
         val cellWidth = canvasWidth / level.w
         return Position((x / cellWidth).toInt(), (y / cellWidth).toInt())
     }

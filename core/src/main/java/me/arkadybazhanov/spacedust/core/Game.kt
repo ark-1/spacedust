@@ -13,10 +13,11 @@ object Game {
 
     fun getNextId() = nextId++
 
-    suspend fun update() {
-        val (time, nextCharacter) = characters.poll() ?: error("Nothing to do :(")
+    suspend fun update(): Boolean {
+        val (time, nextCharacter) = characters.poll() ?: return false
         this.time = time
         val newTime = time + nextCharacter.getCharacterMove().perform()
         characters += newTime to nextCharacter
+        return true
     }
 }

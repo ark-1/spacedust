@@ -4,6 +4,7 @@ import android.content.*
 import android.graphics.*
 import android.util.*
 import android.view.*
+import kotlinx.coroutines.channels.*
 import me.arkadybazhanov.spacedust.core.*
 
 class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context, attributes), SurfaceHolder.Callback {
@@ -15,13 +16,6 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
     private val thread = ViewThread(holder, this)
     private val drawer = LevelDrawer(resources)
 
-    private val player = generateLevelAndCreate { level, position ->
-        Player(level, position)
-    }.second
-
-    init {
-        Game.characters += 0 to player
-    }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         thread.running = true
@@ -40,18 +34,17 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
         }
     }
 
-    suspend fun update() = Game.update()
+    val playerMoves = Channel<Position>(Channel.UNLIMITED)
 
-    var resume: ((Position) -> Unit)? = null
+    var snapshot: LevelSnapshot? = null
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        drawer.drawLevel(LevelSnapshot(player.level), canvas)
+        snapshot?.let { drawer.drawLevel(it, canvas) }
     }
 
     fun tap(x: Float, y: Float) {
         println("$x $y !!")
-        resume?.invoke(drawer.getCell(player.level, width, x, y))
-        resume = null
+        playerMoves.offer(snapshot?.let { drawer.getCell(it, width, x, y) } ?: return)
     }
 }
