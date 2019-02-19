@@ -35,5 +35,15 @@ class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
         }
     }
 
+    fun withPosition(): Iterator<Pair<Position, Cell>> = iterator {
+        for ((x, col) in cells.withIndex()) {
+            for ((y, cell) in col.withIndex()) {
+                yield(Position(x, y) to cell)
+            }
+        }
+    }
+
+
+
     operator fun get(position: Position): Cell = cells[position.x][position.y]
 }
