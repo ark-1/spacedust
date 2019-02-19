@@ -31,6 +31,7 @@ class Attack(
 ) : PerformableEvent {
 
     override fun perform(): Int {
+        defender.die()
         return duration
     }
 }

@@ -18,3 +18,8 @@ interface Character : Comparable<Character> {
 fun Character.put() {
     level[position].character = this
 }
+
+fun Character.die() {
+    level[position].character = null
+    Game.characters.remove(Game.characters.find { (_, character) -> character == this })
+}
