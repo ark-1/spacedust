@@ -18,13 +18,20 @@ class LevelDrawer(private val resources: Resources) {
         }
     }
 
-    private fun LevelSnapshot.CellSnapshot.toBitmap() = (if (characterType != null) when (characterType) {
-        Player::class -> player
-        else -> monster
-    } else when (type) {
-        AIR -> blue
-        STONE -> white
-    }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
+    private val bitmapCache = mutableMapOf<Int, Bitmap>()
+
+    private fun LevelSnapshot.CellSnapshot.toBitmap(): Bitmap {
+        val id = if (characterType != null) when (characterType) {
+            Player::class -> player
+            else -> monster
+        } else when (type) {
+            AIR -> blue
+            STONE -> white
+        }
+        return bitmapCache[id] ?: (
+            BitmapFactory.decodeResource(resources, id) ?: error("Could not decode cell bitmap")
+        ).also { bitmapCache[id] = it }
+    }
 
     fun getCell(level: LevelSnapshot, canvasWidth: Int, x: Float, y: Float): Position {
         val cellWidth = canvasWidth / level.w
