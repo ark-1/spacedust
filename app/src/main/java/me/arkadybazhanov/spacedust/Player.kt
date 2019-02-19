@@ -13,7 +13,7 @@ class Player(override var level: Level, override var position: Position) : Chara
     )
 
     override fun canMoveTo(position: Position): Boolean {
-        return ((position.x !in (0 until level.w) || position.y !in (0 until level.h)))
+        return ((position.x in (0 until level.w) || position.y in (0 until level.h)))
                 && level[position] is Cell.Air
                 && level[position].characters.isEmpty()
     }
