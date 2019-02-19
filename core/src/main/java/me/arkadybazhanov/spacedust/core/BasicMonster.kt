@@ -12,13 +12,12 @@ class BasicMonster(override var level: Level, override var position: Position) :
     override val id: Int = Game.getNextId()
 
     override suspend fun getCharacterMove(): PerformableEvent {
-        var playerPosition = position
         for ((position, cell) in level.withPosition()) {
             if (!cell.characters.isEmpty() && position != this.position) {
-                playerPosition = position
+                return Move(this, getNextMoveToTarget(this, cell.characters[0]), Game.time, 1)
             }
         }
-        return Move(this, getNextMove(this, playerPosition), Game.time, 1)
+        return Move(this, position, Game.time, 1)
     }
 
      override val directions = listOf(
