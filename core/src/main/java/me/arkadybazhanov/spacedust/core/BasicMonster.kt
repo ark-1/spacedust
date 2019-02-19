@@ -7,7 +7,7 @@ class BasicMonster(override var level: Level, override var position: Position,
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
                 && level[position].type == CellType.AIR
-                && level[position].characters.isEmpty()
+                && level[position].character == null
     }
 
     fun canAttack(character: Character): Boolean {
@@ -21,11 +21,11 @@ class BasicMonster(override var level: Level, override var position: Position,
 
     override suspend fun getCharacterMove(): PerformableEvent {
         for ((position, cell) in level.withPosition()) {
-            if (!cell.characters.isEmpty() && position != this.position) {
-                if (canAttack(cell.characters[0])) {
-                    return Attack(this, cell.characters[0], Game.time, 1)
+            if (cell.character != null && position != this.position) {
+                if (canAttack(cell.character!!)) {
+                    return Attack(this, cell.character!!, Game.time, 1)
                 }
-                return Move(this, getNextMoveToTarget(this, cell.characters[0]), Game.time, speed)
+                return Move(this, getNextMoveToTarget(this, cell.character!!), Game.time, speed)
             }
         }
         return Move(this, position, Game.time, speed)

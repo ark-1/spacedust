@@ -2,7 +2,6 @@ package me.arkadybazhanov.spacedust
 
 import android.graphics.*
 import android.view.*
-import kotlinx.coroutines.runBlocking
 
 inline fun catchPrint(block: () -> Unit) {
     try {

@@ -2,7 +2,7 @@ package me.arkadybazhanov.spacedust.core
 
 class Cell(val type: CellType) {
     val events = mutableListOf<Event>()
-    val characters = mutableListOf<Character>()
+    var character: Character? = null
 }
 
 enum class CellType {
@@ -29,14 +29,6 @@ class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
         for (col in cells) for (cell in col) yield(cell)
     }
 
-    fun withCoordinates(): Iterator<Triple<Int, Int, Cell>> = iterator {
-        for ((x, col) in cells.withIndex()) {
-            for ((y, cell) in col.withIndex()) {
-                yield(Triple(x, y, cell))
-            }
-        }
-    }
-
     fun withPosition(): Iterator<Pair<Position, Cell>> = iterator {
         for ((x, col) in cells.withIndex()) {
             for ((y, cell) in col.withIndex()) {
@@ -44,8 +36,6 @@ class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
             }
         }
     }
-
-
 
     operator fun get(position: Position): Cell = cells[position.x][position.y]
     operator fun get(x: Int, y: Int): Cell = cells[x][y]

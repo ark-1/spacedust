@@ -16,7 +16,7 @@ class Player(override var level: Level, override var position: Position) : Chara
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
                 && level[position].type == CellType.AIR
-                && level[position].characters.isEmpty()
+                && level[position].character == null
     }
 
     override val id: Int = Game.getNextId()
