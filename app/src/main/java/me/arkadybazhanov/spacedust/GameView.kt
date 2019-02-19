@@ -12,10 +12,12 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
         holder.addCallback(this)
     }
 
-    private val thread = GameThread(holder, this)
+    private val thread = ViewThread(holder, this)
     private val drawer = LevelDrawer(resources)
 
-    private val player = generateLevelAndCreate(::Player).second
+    private val player = generateLevelAndCreate { level, position ->
+        Player(level, position)
+    }.second
 
     init {
         Game.characters += 0 to player

@@ -24,21 +24,14 @@ inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
     }
 }
 
-class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
+class ViewThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
     var running: Boolean = false
 
     override fun run() {
         while (running) {
             val startTime = System.nanoTime()
 
-            surfaceHolder.withCanvas { canvas ->
-
-                runBlocking {
-                    gameView.update()
-                }
-
-                gameView.draw(canvas)
-            }
+            surfaceHolder.withCanvas(gameView::draw)
 
             val timeMillis = (System.nanoTime() - startTime) / 1_000_000
             val waitTime = targetTimeMillis - timeMillis

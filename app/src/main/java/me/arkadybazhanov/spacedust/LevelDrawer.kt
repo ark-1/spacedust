@@ -4,7 +4,7 @@ import android.content.res.*
 import android.graphics.*
 import me.arkadybazhanov.spacedust.R.drawable.*
 import me.arkadybazhanov.spacedust.core.*
-import me.arkadybazhanov.spacedust.core.Cell.*
+import me.arkadybazhanov.spacedust.core.CellType.*
 
 class LevelDrawer(private val resources: Resources) {
     fun drawLevel(level: Level, canvas: Canvas) {
@@ -21,9 +21,9 @@ class LevelDrawer(private val resources: Resources) {
     private fun Cell.toBitmap() = (if (characters.isNotEmpty()) when (characters[0]) {
         is Player -> player
         else -> monster
-    } else when (this) {
-        is Air -> blue
-        is Stone -> white
+    } else when (type) {
+        AIR -> blue
+        STONE -> white
     }).let { BitmapFactory.decodeResource(resources, it) } ?: error("Could not decode cell bitmap")
 
     fun getCell(level: Level, canvasWidth: Int, x: Float, y: Float): Position {

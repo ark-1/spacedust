@@ -13,7 +13,7 @@ inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Pos
 fun generateLevel(): Pair<Level, Position> {
     val level = Level(Array(40) { x ->
         Array(40) { y ->
-            if (x % (y + 1) == 0) Cell.Stone() else Cell.Air()
+            Cell(if (x % (y + 1) == 0) CellType.STONE else CellType.AIR)
         }
     })
     val monster = BasicMonster(level, Position(8, 10))

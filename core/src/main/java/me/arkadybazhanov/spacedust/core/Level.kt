@@ -1,10 +1,12 @@
 package me.arkadybazhanov.spacedust.core
 
-sealed class Cell {
+class Cell(val type: CellType) {
     val events = mutableListOf<Event>()
     val characters = mutableListOf<Character>()
-    class Stone : Cell()
-    class Air : Cell()
+}
+
+enum class CellType {
+    STONE, AIR
 }
 
 data class Position(val x: Int, val y: Int) {
