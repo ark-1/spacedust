@@ -9,13 +9,12 @@ import me.arkadybazhanov.spacedust.core.*
 
 class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context, attributes), SurfaceHolder.Callback {
 
-    init {
-        holder.addCallback(this)
-    }
-
     private val thread = ViewThread(holder, this)
     private val drawer = LevelDrawer(resources)
 
+    init {
+        holder.addCallback(this)
+    }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         thread.running = true
@@ -25,18 +24,19 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        while (true) {
-            catchPrint {
-                thread.running = false
-                thread.join()
-                return
-            }
+        while (true) catchPrint {
+            thread.running = false
+            thread.join()
+            return
         }
     }
 
     val playerMoves = Channel<Position>(Channel.UNLIMITED)
 
     var snapshot: LevelSnapshot? = null
+    var scaleFactor by drawer::scaleFactor
+    var shiftX by drawer::shiftX
+    var shiftY by drawer::shiftY
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
@@ -44,7 +44,6 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
     }
 
     fun tap(x: Float, y: Float) {
-        println("$x $y !!")
         playerMoves.offer(snapshot?.let { drawer.getCell(it, width, x, y) } ?: return)
     }
 }
