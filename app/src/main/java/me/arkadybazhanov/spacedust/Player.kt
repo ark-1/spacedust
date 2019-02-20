@@ -21,7 +21,12 @@ class Player(override var level: Level, override var position: Position, private
 
     override suspend fun getCharacterMove(): PerformableEvent {
         var position: Position
-        do position = view.playerMoves.receive() while (!canMoveTo(position))
+        do {
+            position = view.playerMoves.receive()
+        } while (!canMoveTo(position) && level[position].character == null)
+        if (level[position].character != null) {
+            return Attack(this, level[position].character!!, Game.time, 1)
+        }
         return Move(this, position, Game.time, 20)
     }
 }
