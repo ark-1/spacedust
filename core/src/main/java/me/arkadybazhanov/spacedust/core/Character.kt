@@ -22,5 +22,5 @@ fun Character.put() {
 
 fun Character.die() {
     level[position].character = null
-    Game.characters -= Game.characters.find { (_, character) -> character == this }
+    Game.characters -= Game.characters.first { (_, character) -> character == this }
 }
