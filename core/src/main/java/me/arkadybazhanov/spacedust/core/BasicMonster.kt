@@ -10,7 +10,7 @@ class BasicMonster(override var level: Level, override var position: Position,
                 && level[position].character == null
     }
 
-    fun canAttack(character: Character): Boolean {
+    private fun canAttack(character: Character): Boolean {
         for (direction in directions) {
             if (character.position == position + direction) return true
         }
@@ -22,10 +22,11 @@ class BasicMonster(override var level: Level, override var position: Position,
     override suspend fun getCharacterMove(): PerformableEvent {
         for ((position, cell) in level.withPosition()) {
             if (cell.character != null && position != this.position) {
-                if (canAttack(cell.character!!)) {
-                    return Attack(this, cell.character!!, Game.time, 1)
+                return if (canAttack(cell.character!!)) {
+                    Attack(this, cell.character!!, Game.time, 1)
+                } else {
+                    Move(this, getNextMoveToTarget(this, cell.character!!), Game.time, speed)
                 }
-                return Move(this, getNextMoveToTarget(this, cell.character!!), Game.time, speed)
             }
         }
         return Move(this, position, Game.time, speed)
@@ -35,8 +36,10 @@ class BasicMonster(override var level: Level, override var position: Position,
         Direction(0, -1),
         Direction(-1, 0),
         Direction(0, 1),
-        Direction(1, 0)
+        Direction(1, 0),
+        Direction(-1, -1),
+        Direction(-1, 1),
+        Direction(1, 1),
+        Direction(1, -1)
     )
-
-
 }
