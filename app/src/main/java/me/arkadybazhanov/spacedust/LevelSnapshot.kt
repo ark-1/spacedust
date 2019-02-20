@@ -4,7 +4,7 @@ import me.arkadybazhanov.spacedust.core.*
 import kotlin.reflect.KClass
 
 class LevelSnapshot private constructor(private val cells: Array<Array<CellSnapshot>>) {
-    data class CellSnapshot(val type: CellType, val characterType: KClass<*>?)
+    data class CellSnapshot(val type: CellType, val characterType: KClass<out Character>?)
 
     val w = cells.size
     val h = cells[0].size
