@@ -1,7 +1,6 @@
 package me.arkadybazhanov.spacedust
 
 import android.app.*
-import android.hardware.Camera
 import android.os.*
 import android.support.v4.view.GestureDetectorCompat
 import android.view.*
@@ -15,36 +14,31 @@ class MainActivity : Activity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + job
 
-    private lateinit var detector: GestureDetectorCompat
+    private lateinit var gestureDetector: GestureDetectorCompat
+    private lateinit var scaleGestureDetector: ScaleGestureDetector
 
     private lateinit var view: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        detector = GestureDetectorCompat(this, Listener())
+        gestureDetector = GestureDetectorCompat(this, gestureListener)
+        scaleGestureDetector = ScaleGestureDetector(this, gestureListener)
 
         window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
 
         setContentView(R.layout.activity_main)
-        view = findViewById(R.id.game_view)
-    }
+        view = findViewById(R.id.game_view)!!
 
-    override fun onResume() {
-        super.onResume()
-        view.camera = Camera.open()
-    }
-    private var inPreview = false
-    override fun onPause() {
-        super.onPause()
-        if (inPreview) view.camera.stopPreview()
-        view.camera.release()
-        view = findViewById(R.id.game_view)
         job = Job()
-
         launch {
             GameUpdater(view).run()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        view = findViewById(R.id.game_view)
     }
 
     override fun onDestroy() {
@@ -52,13 +46,36 @@ class MainActivity : Activity(), CoroutineScope {
         job.cancel()
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean = detector.onTouchEvent(event) || super.onTouchEvent(event)
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        return (scaleGestureDetector.onTouchEvent(event) or
+            gestureDetector.onTouchEvent(event)) ||
+            super.onTouchEvent(event)
+    }
 
-    private inner class Listener : GestureDetector.SimpleOnGestureListener() {
+    private val gestureListener = object :
+        GestureDetector.OnGestureListener by GestureDetector.SimpleOnGestureListener(),
+        ScaleGestureDetector.OnScaleGestureListener by ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        var prevX: Float? = null
+        var prevY: Float? = null
+
         override fun onDown(e: MotionEvent?): Boolean = true
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             view.tap(e.x, e.y)
+            return true
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            view.scaleFactor *= detector.scaleFactor
+            view.shiftX -= ((detector.scaleFactor - 1) * detector.focusX).toInt()
+            view.shiftY -= ((detector.scaleFactor - 1) * detector.focusY).toInt()
+            return true
+        }
+
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+            view.shiftX -= distanceX
+            view.shiftY -= distanceY
             return true
         }
     }

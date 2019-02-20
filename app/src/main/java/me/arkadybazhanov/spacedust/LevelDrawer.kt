@@ -8,13 +8,29 @@ import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.CellType.*
 
 class LevelDrawer(private val resources: Resources) {
+    var scaleFactor = 1.0
+
+    var shiftX = 0f
+    var shiftY = 0f
+
+    private fun square(left: Float, top: Float, width: Float) = RectF(
+        left,
+        top,
+        left + width,
+        top + width
+    )
+
     fun drawLevel(level: LevelSnapshot, canvas: Canvas) {
-        val cellWidth = canvas.width / level.w
+        val cellWidth = cellWidth(canvas.width, level)
 
         for ((x, y, cell) in level.withCoordinates()) {
             val bm = cell.toBitmap()
             val src = Rect(0, 0, bm.width, bm.height)
-            val dst = Rect(x * cellWidth, y * cellWidth, (x + 1) * cellWidth, (y + 1) * cellWidth)
+            val dst = square(
+                shiftX + x * cellWidth,
+                shiftY + y * cellWidth,
+                cellWidth
+            )
             canvas.drawBitmap(bm, src, dst, null)
         }
     }
@@ -42,7 +58,10 @@ class LevelDrawer(private val resources: Resources) {
     }
 
     fun getCell(level: LevelSnapshot, canvasWidth: Int, x: Float, y: Float): Position {
-        val cellWidth = canvasWidth / level.w
-        return Position((x / cellWidth).toInt(), (y / cellWidth).toInt())
+        val cellWidth = cellWidth(canvasWidth, level)
+        return Position(((x - shiftX) / cellWidth).toInt(), ((y - shiftY) / cellWidth).toInt())
     }
+
+    private fun cellWidth(canvasWidth: Int, level: LevelSnapshot) =
+        (canvasWidth / level.w * scaleFactor).toFloat()
 }
