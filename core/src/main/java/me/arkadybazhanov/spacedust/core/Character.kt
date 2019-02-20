@@ -17,9 +17,10 @@ interface Character : Comparable<Character> {
 
 fun Character.put() {
     level[position].character = this
+    Game.characters += Game.time to this
 }
 
 fun Character.die() {
     level[position].character = null
-    Game.characters.remove(Game.characters.find { (_, character) -> character == this })
+    Game.characters -= Game.characters.find { (_, character) -> character == this }
 }

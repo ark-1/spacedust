@@ -20,9 +20,8 @@ fun generateLevel(): Pair<Level, Position> {
         }
     })
 
-    val monster = BasicMonster(level, Position(8, 10), 1, 100, 10)
-    Game.characters += 0 to monster
-    monster.put()
+    BasicMonster(level, Position(1, 13), 15, 100, 10).put()
+    BasicMonster(level, Position(8, 20), 15, 100, 10).put()
 
     return level to Position(1, 1)
 }
