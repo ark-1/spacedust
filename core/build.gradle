@@ -12,6 +12,11 @@ targetCompatibility = "7"
 repositories {
     mavenCentral()
 }
+
+compileKotlin {
+    kotlinOptions.freeCompilerArgs += ['-Xuse-experimental=kotlin.Experimental']
+}
+
 //compileKotlin {
 //    kotlinOptions {
 //        jvmTarget = "1.8"

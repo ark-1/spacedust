@@ -5,6 +5,7 @@ import android.graphics.*
 import android.hardware.Camera
 import android.util.*
 import android.view.*
+import kotlinx.coroutines.channels.*
 import me.arkadybazhanov.spacedust.core.*
 import android.widget.ZoomControls
 
@@ -118,15 +119,9 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
         }*/
     }
 
-    private val thread = GameThread(holder, this)
-    private val drawer = FieldDrawer(resources)
-    private val field = Field(Array(40) { x ->
-        Array(40) { y ->
-            if (x % (y + 1) == 0) Cell.Stone else Cell.Air
-        }
-    })
+    private val thread = ViewThread(holder, this)
+    private val drawer = LevelDrawer(resources)
 
-    private val game = Game()
 
     private fun getBestPreviewSize(width: Int, height: Int, parameters: Camera.Parameters): Camera.Size? {
         var result: Camera.Size? = null
@@ -147,7 +142,7 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        thread.setRunning(true)
+        thread.running = true
         thread.start()
         camera.stopPreview()
         camera.setPreviewDisplay(holder)
@@ -193,16 +188,23 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         while (true) catchPrint {
-            thread.setRunning(false)
+            thread.running = false
             thread.join()
             return
         }
     }
 
-    fun update() = game.update()
+    val playerMoves = Channel<Position>(Channel.UNLIMITED)
+
+    var snapshot: LevelSnapshot? = null
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        drawer.drawField(field, canvas)
+        snapshot?.let { drawer.drawLevel(it, canvas) }
+    }
+
+    fun tap(x: Float, y: Float) {
+        println("$x $y !!")
+        playerMoves.offer(snapshot?.let { drawer.getCell(it, width, x, y) } ?: return)
     }
 }
