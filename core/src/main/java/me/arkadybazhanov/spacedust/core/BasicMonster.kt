@@ -16,7 +16,7 @@ class BasicMonster(override var level: Level, override var position: Position,
         for ((position, cell) in level.withPosition()) {
             if (cell.character != null && position != this.position) {
                 return if (isNear(cell.character!!.position)) {
-                    Attack(this, cell.character!!, Game.time, 1)
+                    Attack(this, cell.character!!, Game.time, speed)
                 } else {
                     Move(this, getNextMoveToTarget(this, cell.character!!), Game.time, speed)
                 }

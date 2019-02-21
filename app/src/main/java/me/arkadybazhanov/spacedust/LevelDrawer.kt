@@ -37,6 +37,17 @@ class LevelDrawer(private val resources: Resources) {
             canvas.drawBitmap(bm, src, dst, null)
             bm2?.let { canvas.drawBitmap(it, src, dst, null) }
         }
+
+        val gridPaint = Paint().apply { alpha = 20 }
+
+        for (x in 1 until level.w) {
+            canvas.drawLine(x * cellWidth, 0f, x * cellWidth, level.h * cellWidth, gridPaint)
+        }
+
+        for (y in 1 until level.h) {
+            canvas.drawLine(0f, y * cellWidth, level.h * cellWidth, y * cellWidth, gridPaint)
+        }
+
         canvas.restore()
     }
 

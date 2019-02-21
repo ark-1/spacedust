@@ -20,7 +20,7 @@ class Player(override var level: Level, override var position: Position, private
         } while (!canMoveTo(position) && level[position].character == null || !isNear(position))
 
         return if (level[position].character != null) {
-            Attack(this, level[position].character!!, Game.time, 1)
+            Attack(this, level[position].character!!, Game.time, 10)
         } else {
             Move(this, position, Game.time, 20)
         }

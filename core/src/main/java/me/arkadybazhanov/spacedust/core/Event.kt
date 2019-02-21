@@ -12,7 +12,7 @@ class Move(
     val character: Character,
     val to: Position,
     override val time: Int,
-    val duration: Int
+    private val duration: Int
 ) : PerformableEvent {
 
     override fun perform(): Int {
@@ -27,7 +27,7 @@ class Attack(
     val attacker: Character,
     val defender: Character,
     override val time: Int,
-    val duration: Int
+    private val duration: Int
 ) : PerformableEvent {
 
     override fun perform(): Int {
