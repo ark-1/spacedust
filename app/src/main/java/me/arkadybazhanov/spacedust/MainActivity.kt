@@ -6,12 +6,11 @@ import android.support.v4.view.GestureDetectorCompat
 import android.view.*
 import android.view.WindowManager.LayoutParams.*
 import kotlinx.coroutines.*
-import kotlin.coroutines.*
 
 class MainActivity : Activity(), CoroutineScope {
 
     private lateinit var job: Job
-    override val coroutineContext: CoroutineContext
+    override val coroutineContext
         get() = Dispatchers.Default + job
 
     private lateinit var gestureDetector: GestureDetectorCompat
@@ -34,11 +33,6 @@ class MainActivity : Activity(), CoroutineScope {
         launch {
             GameUpdater(view).run()
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        view = findViewById(R.id.game_view)
     }
 
     override fun onDestroy() {

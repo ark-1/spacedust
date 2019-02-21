@@ -4,31 +4,36 @@ import android.content.*
 import android.graphics.*
 import android.util.*
 import android.view.*
-import kotlinx.coroutines.channels.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import me.arkadybazhanov.spacedust.core.*
 
-class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context, attributes), SurfaceHolder.Callback {
+class GameView(context: Context, attributes: AttributeSet) :
+    SurfaceView(context, attributes),
+    SurfaceHolder.Callback,
+    CoroutineScope {
 
-    private val thread = ViewThread(holder, this)
     private val drawer = LevelDrawer(resources)
+
+    private lateinit var job: Job
+    override val coroutineContext
+        get() = Dispatchers.Default + job
 
     init {
         holder.addCallback(this)
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
-        thread.running = true
-        thread.start()
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        job = Job()
+        launch {
+            ViewUpdater.run(holder, this@GameView)
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        while (true) catchPrint {
-            thread.running = false
-            thread.join()
-            return
-        }
+        job.cancel()
     }
 
     val playerMoves = Channel<Position>(Channel.UNLIMITED)

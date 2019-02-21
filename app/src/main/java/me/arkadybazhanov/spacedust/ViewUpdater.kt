@@ -2,6 +2,7 @@ package me.arkadybazhanov.spacedust
 
 import android.graphics.*
 import android.view.*
+import kotlinx.coroutines.delay
 
 inline fun catchPrint(block: () -> Unit) {
     try {
@@ -23,11 +24,9 @@ inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
     }
 }
 
-class ViewThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
-    var running: Boolean = false
-
-    override fun run() {
-        while (running) {
+object ViewUpdater {
+    suspend fun run(surfaceHolder: SurfaceHolder, gameView: GameView) {
+        while (true) {
             val startTime = System.nanoTime()
 
             surfaceHolder.withCanvas(gameView::draw)
@@ -35,12 +34,10 @@ class ViewThread(private val surfaceHolder: SurfaceHolder, private val gameView:
             val timeMillis = (System.nanoTime() - startTime) / 1_000_000
             val waitTime = targetTimeMillis - timeMillis
 
-            sleep(waitTime.coerceAtLeast(0))
+            delay(waitTime)
         }
     }
 
-    companion object {
-        private const val targetFps = 20
-        private const val targetTimeMillis = 1000L / targetFps
-    }
+    private const val targetFps = 20
+    private const val targetTimeMillis = 1000L / targetFps
 }
