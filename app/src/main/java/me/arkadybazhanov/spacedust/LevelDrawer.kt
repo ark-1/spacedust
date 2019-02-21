@@ -24,7 +24,7 @@ class LevelDrawer(private val resources: Resources) {
         val cellWidth = cellWidth(canvas.width, level)
 
         for ((x, y, cell) in level.withCoordinates()) {
-            val bm = cell.toBitmap()
+            val (bm, bm2) = cell.toBitmaps()
             val src = Rect(0, 0, bm.width, bm.height)
             val dst = square(
                 shiftX + x * cellWidth,
@@ -32,6 +32,7 @@ class LevelDrawer(private val resources: Resources) {
                 cellWidth
             )
             canvas.drawBitmap(bm, src, dst, null)
+            bm2?.let { canvas.drawBitmap(it, src, dst, null) }
         }
     }
 
@@ -43,18 +44,17 @@ class LevelDrawer(private val resources: Resources) {
         ).also { cache[id] = it }
     }
 
-    private fun CellSnapshot.toBitmap(): Bitmap {
+    private fun CellSnapshot.toBitmaps(): Pair<Bitmap, Bitmap?> {
+        val cellId = when (type) {
+            AIR -> air
+            STONE -> stone
+        }
         val id = when (characterType) {
-
-            null -> when (type) {
-                AIR -> blue
-                STONE -> white
-            }
-
+            null -> null
             Player::class -> player
             else -> monster
         }
-        return bitmaps[id]
+        return bitmaps[cellId] to id?.let { bitmaps[it] }
     }
 
     fun getCell(level: LevelSnapshot, canvasWidth: Int, x: Float, y: Float): Position {

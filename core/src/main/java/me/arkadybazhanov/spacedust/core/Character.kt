@@ -35,7 +35,7 @@ interface Character : Comparable<Character> {
     }
 }
 
-fun Character.put() {
+fun Character.create() {
     level[position].character = this
     Game.characters += Game.time to this
 }
