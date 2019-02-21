@@ -6,8 +6,7 @@ class Player(override var level: Level, override var position: Position, private
     override val directions = Character.kingDirections
 
     override fun canMoveTo(position: Position): Boolean {
-        return position.x in (0 until level.w)
-            && position.y in (0 until level.h)
+        return position.isValid(level.w, level.h)
             && level[position].type == CellType.AIR
             && level[position].character == null
     }

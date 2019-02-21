@@ -56,9 +56,6 @@ class MainActivity : Activity(), CoroutineScope {
         GestureDetector.OnGestureListener by GestureDetector.SimpleOnGestureListener(),
         ScaleGestureDetector.OnScaleGestureListener by ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
-        var prevX: Float? = null
-        var prevY: Float? = null
-
         override fun onDown(e: MotionEvent?): Boolean = true
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -70,12 +67,14 @@ class MainActivity : Activity(), CoroutineScope {
             view.scaleFactor *= detector.scaleFactor
             view.shiftX -= ((detector.scaleFactor - 1) * detector.focusX).toInt()
             view.shiftY -= ((detector.scaleFactor - 1) * detector.focusY).toInt()
+            view.invalidate()
             return true
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             view.shiftX -= distanceX
             view.shiftY -= distanceY
+            view.invalidate()
             return true
         }
     }

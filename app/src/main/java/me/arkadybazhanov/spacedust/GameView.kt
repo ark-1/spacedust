@@ -44,6 +44,6 @@ class GameView(context: Context, attributes: AttributeSet) : SurfaceView(context
     }
 
     fun tap(x: Float, y: Float) {
-        playerMoves.offer(snapshot?.let { drawer.getCell(it, width, x, y) } ?: return)
+        playerMoves.offer(snapshot?.let { drawer.getCell(it, x, y) } ?: return)
     }
 }

@@ -8,7 +8,7 @@ import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.CellType.*
 
 class LevelDrawer(private val resources: Resources) {
-    var scaleFactor = 1.0
+    var scaleFactor = 1.0f
 
     var shiftX = 0f
     var shiftY = 0f
@@ -21,19 +21,23 @@ class LevelDrawer(private val resources: Resources) {
     )
 
     fun drawLevel(level: LevelSnapshot, canvas: Canvas) {
-        val cellWidth = cellWidth(canvas.width, level)
+        canvas.save()
+        canvas.scale(scaleFactor, scaleFactor)
+        canvas.translate(shiftX, shiftY)
+        val cellWidth = CELL_WIDTH
 
         for ((x, y, cell) in level.withCoordinates()) {
             val (bm, bm2) = cell.toBitmaps()
             val src = Rect(0, 0, bm.width, bm.height)
             val dst = square(
-                shiftX + x * cellWidth,
-                shiftY + y * cellWidth,
+                x * cellWidth,
+                y * cellWidth,
                 cellWidth
             )
             canvas.drawBitmap(bm, src, dst, null)
             bm2?.let { canvas.drawBitmap(it, src, dst, null) }
         }
+        canvas.restore()
     }
 
     private val bitmaps = object {
@@ -57,11 +61,16 @@ class LevelDrawer(private val resources: Resources) {
         return bitmaps[cellId] to id?.let { bitmaps[it] }
     }
 
-    fun getCell(level: LevelSnapshot, canvasWidth: Int, x: Float, y: Float): Position {
-        val cellWidth = cellWidth(canvasWidth, level)
-        return Position(((x - shiftX) / cellWidth).toInt(), ((y - shiftY) / cellWidth).toInt())
+    fun getCell(level: LevelSnapshot, x: Float, y: Float): Position? {
+        val cellWidth = CELL_WIDTH
+        val position = Position(
+            x = ((x / scaleFactor - shiftX) / cellWidth).toInt(),
+            y = ((y / scaleFactor - shiftY) / cellWidth).toInt()
+        )
+        return position.takeIf { it.isValid(level.w, level.h) }
     }
 
-    private fun cellWidth(canvasWidth: Int, level: LevelSnapshot) =
-        (canvasWidth / level.w * scaleFactor).toFloat()
+    companion object {
+        private const val CELL_WIDTH = 64f
+    }
 }

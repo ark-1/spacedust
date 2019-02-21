@@ -13,6 +13,8 @@ data class Position(val x: Int, val y: Int) {
     operator fun plus(other: Direction): Position {
         return Position(x + other.x, y + other.y)
     }
+
+    fun isValid(w: Int, h: Int) = x in (0 until w) && y in (0 until h)
 }
 
 data class Direction(val x: Int, val y: Int)
