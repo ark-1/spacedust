@@ -1,30 +1,25 @@
 package me.arkadybazhanov.spacedust
 
-import android.graphics.*
-import android.view.*
+import android.graphics.Canvas
+import android.util.Log
+import android.view.SurfaceHolder
 import kotlinx.coroutines.delay
 
-inline fun catchPrint(block: () -> Unit) {
-    try {
-        block()
-    } catch (e: Throwable) {
-        e.printStackTrace()
-    }
-}
-
-inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
-    val canvas: Canvas = lockCanvas() ?: error("Could not lock canvas")
-
-    try {
-        synchronized(this) {
-            body(canvas)
-        }
-    } finally {
-        unlockCanvasAndPost(canvas)
-    }
-}
-
 object ViewUpdater {
+
+    private inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
+        val canvas = lockCanvas() ?: run {
+            Log.d("ViewUpdater", "Could not lock canvas")
+            return
+        }
+
+        try {
+            body(canvas)
+        } finally {
+            unlockCanvasAndPost(canvas)
+        }
+    }
+
     suspend fun run(surfaceHolder: SurfaceHolder, gameView: GameView) {
         while (true) {
             val startTime = System.nanoTime()
@@ -38,6 +33,6 @@ object ViewUpdater {
         }
     }
 
-    private const val targetFps = 20
+    private const val targetFps = 50
     private const val targetTimeMillis = 1000L / targetFps
 }

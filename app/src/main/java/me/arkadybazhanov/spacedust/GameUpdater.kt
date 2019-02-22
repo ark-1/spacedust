@@ -9,8 +9,8 @@ class GameUpdater(private val view: GameView) {
     }.second
 
     suspend fun run() {
-        while (Game.update()) {
+        do {
             view.snapshot = player.level.snapshot()
-        }
+        } while (Game.update())
     }
 }

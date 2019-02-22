@@ -1,10 +1,10 @@
 package me.arkadybazhanov.spacedust
 
-import android.app.*
-import android.os.*
+import android.app.Activity
+import android.os.Bundle
 import android.support.v4.view.GestureDetectorCompat
 import android.view.*
-import android.view.WindowManager.LayoutParams.*
+import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import kotlinx.coroutines.*
 
 class MainActivity : Activity(), CoroutineScope {
@@ -61,14 +61,12 @@ class MainActivity : Activity(), CoroutineScope {
             view.scaleFactor *= detector.scaleFactor
             view.shiftX -= ((detector.scaleFactor - 1) * detector.focusX).toInt()
             view.shiftY -= ((detector.scaleFactor - 1) * detector.focusY).toInt()
-            view.invalidate()
             return true
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             view.shiftX -= distanceX
             view.shiftY -= distanceY
-            view.invalidate()
             return true
         }
     }

@@ -1,11 +1,11 @@
 package me.arkadybazhanov.spacedust
 
-import android.content.res.*
+import android.content.res.Resources
 import android.graphics.*
 import me.arkadybazhanov.spacedust.LevelSnapshot.CellSnapshot
 import me.arkadybazhanov.spacedust.R.drawable.*
-import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.CellType.*
+import me.arkadybazhanov.spacedust.core.Position
 
 class LevelDrawer(private val resources: Resources) {
     var scaleFactor = 1.0f
@@ -24,16 +24,11 @@ class LevelDrawer(private val resources: Resources) {
         canvas.save()
         canvas.scale(scaleFactor, scaleFactor)
         canvas.translate(shiftX, shiftY)
-        val cellWidth = CELL_WIDTH
 
         for ((x, y, cell) in level.withCoordinates()) {
             val (bm, bm2) = cell.toBitmaps()
             val src = Rect(0, 0, bm.width, bm.height)
-            val dst = square(
-                x * cellWidth,
-                y * cellWidth,
-                cellWidth
-            )
+            val dst = square(x.cell, y.cell, 1.cell)
             canvas.drawBitmap(bm, src, dst, null)
             bm2?.let { canvas.drawBitmap(it, src, dst, null) }
         }
@@ -41,11 +36,11 @@ class LevelDrawer(private val resources: Resources) {
         val gridPaint = Paint().apply { alpha = 20 }
 
         for (x in 1 until level.w) {
-            canvas.drawLine(x * cellWidth, 0f, x * cellWidth, level.h * cellWidth, gridPaint)
+            canvas.drawLine(x.cell, 0f, x.cell, level.h.cell, gridPaint)
         }
 
         for (y in 1 until level.h) {
-            canvas.drawLine(0f, y * cellWidth, level.h * cellWidth, y * cellWidth, gridPaint)
+            canvas.drawLine(0f, y.cell, level.h.cell, y.cell, gridPaint)
         }
 
         canvas.restore()
@@ -73,15 +68,16 @@ class LevelDrawer(private val resources: Resources) {
     }
 
     fun getCell(level: LevelSnapshot, x: Float, y: Float): Position? {
-        val cellWidth = CELL_WIDTH
         val position = Position(
-            x = ((x / scaleFactor - shiftX) / cellWidth).toInt(),
-            y = ((y / scaleFactor - shiftY) / cellWidth).toInt()
+            x = ((x / scaleFactor - shiftX) / CELL_WIDTH).toInt(),
+            y = ((y / scaleFactor - shiftY) / CELL_WIDTH).toInt()
         )
         return position.takeIf { it.isValid(level.w, level.h) }
     }
 
     companion object {
-        private const val CELL_WIDTH = 64f
+        const val CELL_WIDTH = 64f
     }
 }
+
+val Int.cell get() = this * LevelDrawer.CELL_WIDTH

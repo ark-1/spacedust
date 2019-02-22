@@ -1,12 +1,12 @@
 package me.arkadybazhanov.spacedust
 
-import android.content.*
-import android.graphics.*
-import android.util.*
+import android.content.Context
+import android.graphics.Canvas
+import android.util.AttributeSet
 import android.view.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import me.arkadybazhanov.spacedust.core.*
+import me.arkadybazhanov.spacedust.core.Position
 
 class GameView(context: Context, attributes: AttributeSet) :
     SurfaceView(context, attributes),

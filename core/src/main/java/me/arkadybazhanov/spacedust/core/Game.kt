@@ -1,6 +1,6 @@
 package me.arkadybazhanov.spacedust.core
 
-import java.util.*
+import java.util.PriorityQueue
 
 object Game {
     val characters = PriorityQueue<Pair<Int, Character>>(
