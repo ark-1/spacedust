@@ -11,18 +11,18 @@ class Player(override var level: Level, override var position: Position, private
     override fun canMoveTo(position: Position): Boolean {
         return position.isValid(level.w, level.h)
             && level[position].type == CellType.AIR
-            && level[position].character == null
+            && level[position].isEmpty()
     }
 
     override val id: Int get() = -1
 
-    override suspend fun getCharacterMove(): PerformableEvent {
+    override suspend fun getNextEvent(): PerformableEvent {
         var position: Position
         do {
             position = view.playerMoves.receive()
-        } while (!canMoveTo(position) && level[position].character == null || !isNear(position))
+        } while (!canMoveTo(position) && level[position].isEmpty() || !isNear(position))
 
-        return if (level[position].character != null) {
+        return if (!level[position].isEmpty()) {
             Attack(this, level[position].character!!, Game.time, 10)
         } else {
             val dir = position - this.position

@@ -7,14 +7,14 @@ class BasicMonster(override var level: Level, override var position: Position,
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
                 && level[position].type == CellType.AIR
-                && level[position].character == null
+                && level[position].isEmpty()
     }
 
     override val id: Int = Game.getNextId()
 
-    override suspend fun getCharacterMove(): PerformableEvent {
+    override suspend fun getNextEvent(): PerformableEvent {
         for ((position, cell) in level.withPosition()) {
-            if (cell.character != null && position != this.position) {
+            if (!cell.isEmpty() && position != this.position) {
                 return if (isNear(cell.character!!.position)) {
                     Attack(this, cell.character!!, Game.time, speed)
                 } else {

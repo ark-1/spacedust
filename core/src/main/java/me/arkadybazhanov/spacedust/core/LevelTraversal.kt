@@ -15,13 +15,12 @@ fun getNextMoveToTarget(character: Character, target: Character): Position {
     while (!bfs.isEmpty()) {
         val position = bfs.remove()!!
 
-        for (direction in character.directions) {
-            val to = position + direction
+        for (to in character.near(position)) {
 
             if (character.canMoveTo(to) && to !in distances.keys) {
                 distances[to] = distances[position]!! + 1
                 previousPositions[to] = position
-                bfs.add(to)
+                bfs += to
             }
 
             if (to == target.position) {

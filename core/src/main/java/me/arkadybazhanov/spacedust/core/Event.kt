@@ -35,3 +35,15 @@ class Attack(
         return duration
     }
 }
+
+class Spawn(
+    override val time: Int,
+    private val duration: Int,
+    private val delay: Int,
+    private val spawn: () -> Character
+) : PerformableEvent {
+    override fun perform(): Int {
+        spawn().create(delay)
+        return duration
+    }
+}

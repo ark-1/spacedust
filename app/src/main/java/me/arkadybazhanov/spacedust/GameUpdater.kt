@@ -1,10 +1,15 @@
 package me.arkadybazhanov.spacedust
 
+import android.util.Log
 import me.arkadybazhanov.spacedust.core.*
 
 class GameUpdater(private val view: GameView) {
 
-    private val player = generateLevelAndCreate { level, position ->
+    init {
+        Log.d(this::class.simpleName, "${Game::class.simpleName}.${Game::seed.name} is ${Game.seed}")
+    }
+
+    private val player = LevelGeneration.generateLevelAndCreate { level, position ->
         Player(level, position, view)
     }.second
 

@@ -3,6 +3,8 @@ package me.arkadybazhanov.spacedust.core
 class Cell(val type: CellType) {
     val events = mutableListOf<Event>()
     var character: Character? = null
+
+    fun isEmpty() = character == null
 }
 
 enum class CellType {
@@ -30,13 +32,13 @@ class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
         for (col in cells) for (cell in col) yield(cell)
     }
 
-    fun withPosition(): Iterator<Pair<Position, Cell>> = iterator {
+    fun withPosition(): Iterable<Pair<Position, Cell>> = iterator {
         for ((x, col) in cells.withIndex()) {
             for ((y, cell) in col.withIndex()) {
                 yield(Position(x, y) to cell)
             }
         }
-    }
+    }.asSequence().asIterable()
 
     operator fun get(position: Position): Cell = cells[position.x][position.y]
     operator fun get(x: Int, y: Int): Cell = cells[x][y]

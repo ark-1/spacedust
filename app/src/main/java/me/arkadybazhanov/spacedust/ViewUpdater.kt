@@ -9,7 +9,7 @@ object ViewUpdater {
 
     private inline fun SurfaceHolder.withCanvas(body: (Canvas) -> Unit) {
         val canvas = lockCanvas() ?: run {
-            Log.d("ViewUpdater", "Could not lock canvas")
+            Log.d("${ViewUpdater::class.simpleName}", "Could not lock canvas")
             return
         }
 

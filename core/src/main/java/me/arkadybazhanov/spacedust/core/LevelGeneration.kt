@@ -1,27 +1,93 @@
 package me.arkadybazhanov.spacedust.core
 
-fun generateLevelAndPut(character: Character): Level = generateLevelAndCreate { _, _ -> character }.first
+import me.arkadybazhanov.spacedust.core.CellType.*
 
-inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-    val (level, position) = generateLevel()
+object LevelGeneration {
+    fun generateLevelAndPut(character: Character): Level = generateLevelAndCreate { _, _ -> character }.first
 
-    val character = characterSupplier(level, position)
-    character.position = position
-    character.level = level
-    character.create()
+    inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
+        val (level, position) = generateMaze(30, 30)
 
-    return level to character
-}
+        val character = characterSupplier(level, position)
+        character.position = position
+        character.level = level
+        character.create()
 
-fun generateLevel(): Pair<Level, Position> {
-    val level = Level(Array(15) { x ->
-        Array(15) { y ->
-            Cell(if (x % (y + 1) == 0) CellType.STONE else CellType.AIR)
+        return level to character
+    }
+
+    fun generateLevel(): Pair<Level, Position> {
+        val level = Level(Array(15) { x ->
+            Array(15) { y ->
+                Cell(if (x % (y + 1) == 0) STONE else AIR)
+            }
+        })
+
+        level.createDefaultMonster(Position(1, 13))
+        level.createDefaultMonster(Position(8, 14))
+
+        return level to Position(1, 1)
+    }
+
+    private fun Level.createDefaultMonster(position: Position) {
+        defaultMonster(position).create()
+    }
+
+    fun generateMaze(w: Int, h: Int): Pair<Level, Position> {
+        require(w > 2 && h > 2) { "width and height should be > 2 (w = $w, h = $h)" }
+
+        val edges = mutableSetOf<Position>()
+        val connectivity = UnionFind<Position>()
+
+        val cells = Array(w) { x ->
+            Array(h) { y ->
+                when {
+                    x == 0 || y == 0 || x == w - 1 || y == h - 1 -> Cell(STONE)
+                    (x + y) % 2 == 1 -> null.also { edges += Position(x, y) }
+                    x % 2 == 0 -> Cell(STONE)
+                    else -> Cell(AIR)
+                }
+            }
         }
-    })
 
-    BasicMonster(level, Position(1, 13), 15, 100, 10).create()
-    BasicMonster(level, Position(8, 14), 15, 100, 10).create()
+        while (edges.isNotEmpty()) {
+            val edge = edges.random(Game.random).also { edges.remove(it) }
+            val (v1, v2) = if (edge.x % 2 == 0) {
+                Position(edge.x - 1, edge.y) to Position(edge.x + 1, edge.y)
+            } else {
+                Position(edge.x, edge.y - 1) to Position(edge.x, edge.y + 1)
+            }
 
-    return level to Position(1, 1)
+            cells[edge.x][edge.y] = if (connectivity.areConnected(v1, v2)) {
+                Cell(STONE)
+            } else {
+                connectivity.connect(v1, v2)
+                Cell(AIR)
+            }
+        }
+
+        if (javaClass.desiredAssertionStatus()) {
+            assert(cells.all { it.all { cell -> cell != null } })
+        }
+
+        val startPos = Position(1, 1)
+
+        @Suppress("UNCHECKED_CAST")
+        return Level(cells as Array<Array<Cell>>).also { level ->
+            for ((pos, cell) in level.withPosition()) {
+                if (cell.type == AIR && pos != startPos && Game.withProbability(0.05)) {
+                    level.createDefaultMonster(pos)
+                }
+            }
+
+            Game.characters += Game.time to MonsterSpawner(
+                level = level,
+                duration = 400,
+                delay = 20
+            ) { level.defaultMonster(it) }
+        } to Position(1, 1)
+    }
+
+    private fun Level.defaultMonster(position: Position) =
+        BasicMonster(this, position, 15, 100, 10)
 }

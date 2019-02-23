@@ -1,18 +1,11 @@
 package me.arkadybazhanov.spacedust.core
 
-interface Character : Comparable<Character> {
-    val id: Int
+interface Character : EventGenerator {
     var level: Level
     var position: Position
     val directions: List<Direction>
 
     fun canMoveTo(position: Position): Boolean
-
-    suspend fun getCharacterMove(): PerformableEvent
-
-    override fun compareTo(other: Character): Int {
-        return id.compareTo(other.id)
-    }
 
     companion object {
         val wazirDirections = listOf(
@@ -35,9 +28,9 @@ interface Character : Comparable<Character> {
     }
 }
 
-fun Character.create() {
+fun Character.create(delay: Int = 0) {
     level[position].character = this
-    Game.characters += Game.time to this
+    Game.characters += Game.time + delay to this
 }
 
 fun Character.die() {
@@ -46,3 +39,4 @@ fun Character.die() {
 }
 
 fun Character.isNear(where: Position): Boolean = directions.any { where == position + it }
+fun Character.near(position: Position): Iterator<Position> = directions.asSequence().map { position + it }.iterator()
