@@ -59,7 +59,11 @@ object LevelGeneration {
             }
 
             cells[edge.x][edge.y] = if (connectivity.areConnected(v1, v2)) {
-                Cell(STONE)
+                if (Game.withProbability(0.1)) {
+                    Cell(AIR)
+                } else {
+                    Cell(STONE)
+                }
             } else {
                 connectivity.connect(v1, v2)
                 Cell(AIR)

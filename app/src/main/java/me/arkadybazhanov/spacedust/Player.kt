@@ -1,6 +1,7 @@
 package me.arkadybazhanov.spacedust
 
-import android.animation.ObjectAnimator
+import android.animation.*
+import android.animation.Animator.AnimatorListener
 import android.graphics.Path
 import kotlinx.coroutines.*
 import me.arkadybazhanov.spacedust.core.*
@@ -51,6 +52,23 @@ class Player(override var level: Level, override var position: Position, private
                         lineTo(-dir.x.cell, -dir.y.cell)
                     }
                 )
+
+                animator.addListener(object : AnimatorListener {
+                    // target (coordinateUpdater) in ObjectAnimator is stored as weak reference, so when getNextEvent
+                    // ends, the animation is cancelled. To overcome this, we store normal reference to
+                    // coordinateUpdater in a listener, so it lives until animation end.
+                    @Suppress("unused")
+                    private var strongReference: Any? = coordinateUpdater
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        strongReference = null
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator) {}
+                    override fun onAnimationCancel(animation: Animator) {}
+                    override fun onAnimationStart(animation: Animator) {}
+                })
+
                 animator.start()
             }
 
