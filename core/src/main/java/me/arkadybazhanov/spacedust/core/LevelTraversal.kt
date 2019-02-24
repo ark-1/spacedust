@@ -2,7 +2,7 @@ package me.arkadybazhanov.spacedust.core
 
 import java.util.*
 
-fun getNextMoveToTarget(character: Character, target: Character): Position {
+fun getNextMoveToTarget(character: Character, isTarget: (Position) -> Boolean): Position {
     val bfs: Queue<Position> = ArrayDeque()
     bfs.add(character.position)
 
@@ -23,7 +23,7 @@ fun getNextMoveToTarget(character: Character, target: Character): Position {
                 bfs += to
             }
 
-            if (to == target.position) {
+            if (isTarget(to)) {
                 var destination = position
                 while (previousPositions[destination]!! != character.position) {
                     destination = previousPositions[destination]!!

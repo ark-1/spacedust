@@ -16,19 +16,6 @@ object LevelGeneration {
         return level to character
     }
 
-    fun generateLevel(): Pair<Level, Position> {
-        val level = Level(Array(15) { x ->
-            Array(15) { y ->
-                Cell(if (x % (y + 1) == 0) STONE else AIR)
-            }
-        })
-
-        level.createDefaultMonster(Position(1, 13))
-        level.createDefaultMonster(Position(8, 14))
-
-        return level to Position(1, 1)
-    }
-
     private fun Level.createDefaultMonster(position: Position) {
         defaultMonster(position).create()
     }
@@ -79,15 +66,16 @@ object LevelGeneration {
         @Suppress("UNCHECKED_CAST")
         return Level(cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
-                if (cell.type == AIR && pos != startPos && Game.withProbability(0.05)) {
+                if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.05)) {
                     level.createDefaultMonster(pos)
                 }
             }
 
             Game.characters += Game.time to MonsterSpawner(
                 level = level,
-                duration = 400,
-                delay = 20
+                duration = 40,
+                delay = 100,
+                positionValidator = { level[it].type in BasicMonster.canStandIn }
             ) { level.defaultMonster(it) }
         } to Position(1, 1)
     }

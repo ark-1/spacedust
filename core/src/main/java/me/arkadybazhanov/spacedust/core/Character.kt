@@ -40,3 +40,4 @@ fun Character.die() {
 
 fun Character.isNear(where: Position): Boolean = directions.any { where == position + it }
 fun Character.near(position: Position): Iterator<Position> = directions.asSequence().map { position + it }.iterator()
+fun Character.nearList(position: Position) = directions.map { position + it }
