@@ -1,6 +1,7 @@
 package me.arkadybazhanov.spacedust
 
 import android.util.Log
+import kotlinx.coroutines.yield
 import me.arkadybazhanov.spacedust.core.*
 
 class GameUpdater(private val view: GameView) {
@@ -16,6 +17,7 @@ class GameUpdater(private val view: GameView) {
     suspend fun run() {
         do {
             view.snapshot = player.level.snapshot()
+            yield()
         } while (Game.update())
     }
 }

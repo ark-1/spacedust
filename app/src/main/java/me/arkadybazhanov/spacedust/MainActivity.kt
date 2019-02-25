@@ -6,6 +6,7 @@ import android.support.v4.view.GestureDetectorCompat
 import android.view.*
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import kotlinx.coroutines.*
+import me.arkadybazhanov.spacedust.core.Game
 
 class MainActivity : Activity(), CoroutineScope {
 
@@ -30,6 +31,7 @@ class MainActivity : Activity(), CoroutineScope {
         view = findViewById(R.id.game_view)!!
 
         job = Job()
+        Game.reset()
         launch {
             GameUpdater(view).run()
         }

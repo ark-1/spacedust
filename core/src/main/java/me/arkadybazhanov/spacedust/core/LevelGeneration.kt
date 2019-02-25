@@ -6,7 +6,7 @@ object LevelGeneration {
     fun generateLevelAndPut(character: Character): Level = generateLevelAndCreate { _, _ -> character }.first
 
     inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateMaze(30, 30)
+        val (level, position) = generateMaze(31, 31)
 
         val character = characterSupplier(level, position)
         character.position = position

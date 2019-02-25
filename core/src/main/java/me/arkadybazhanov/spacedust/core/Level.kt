@@ -20,7 +20,7 @@ data class Position(val x: Int, val y: Int) {
 
 data class Direction(val x: Int, val y: Int)
 
-class Level(val cells: Array<Array<Cell>>) : Iterable<Cell> {
+class Level(private val cells: Array<Array<Cell>>) : Iterable<Cell> {
     init {
         require(cells.isNotEmpty())
     }

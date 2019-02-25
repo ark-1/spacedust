@@ -3,7 +3,7 @@ package me.arkadybazhanov.spacedust
 import android.graphics.Canvas
 import android.util.Log
 import android.view.SurfaceHolder
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 
 object ViewUpdater {
 
@@ -30,6 +30,7 @@ object ViewUpdater {
             val waitTime = targetTimeMillis - timeMillis
 
             delay(waitTime)
+            yield()
         }
     }
 

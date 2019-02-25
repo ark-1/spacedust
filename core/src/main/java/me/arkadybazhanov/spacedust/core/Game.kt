@@ -26,4 +26,6 @@ object Game {
         characters += newTime to nextCharacter
         return true
     }
+
+    fun reset() = characters.clear()
 }
