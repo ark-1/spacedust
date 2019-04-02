@@ -7,7 +7,10 @@ class BasicMonster(override var level: Level, override var position: Position,
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
                 && level[position].type in canStandIn
-                && level[position].isEmpty()
+    }
+
+    override fun isVisible(position: Position): Boolean {
+        return true
     }
 
     override val id: Int = Game.getNextId()
@@ -20,9 +23,11 @@ class BasicMonster(override var level: Level, override var position: Position,
             }
         }
 
-        return Move(this, getNextMoveToTarget(this) {
+        val path = getPathToTarget(this) {
             it != position && !level[it].isEmpty()
-        }, Game.time, speed)
+        } ?: return Move(this, position, Game.time, speed)
+
+        return Move(this, path[0], Game.time, speed)
     }
 
     override val directions = Character.kingDirections

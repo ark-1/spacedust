@@ -6,6 +6,7 @@ interface Character : EventGenerator {
     val directions: List<Direction>
 
     fun canMoveTo(position: Position): Boolean
+    fun isVisible(position: Position) : Boolean
 
     companion object {
         val wazirDirections = listOf(

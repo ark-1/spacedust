@@ -6,12 +6,13 @@ import me.arkadybazhanov.spacedust.LevelSnapshot.CellSnapshot
 import me.arkadybazhanov.spacedust.R.drawable.*
 import me.arkadybazhanov.spacedust.core.CellType.*
 import me.arkadybazhanov.spacedust.core.Position
+import java.lang.Math.*
 
 class LevelDrawer(private val resources: Resources) {
-    var scaleFactor = 1.0f
+    var scaleFactor = 1.7189566f
 
-    var shiftX = 0f
-    var shiftY = 0f
+    var shiftX = Player.VISIBILITY_RANGE.cell
+    var shiftY = Player.VISIBILITY_RANGE.cell
 
     private fun square(left: Float, top: Float, width: Float) = RectF(
         left,
@@ -26,12 +27,19 @@ class LevelDrawer(private val resources: Resources) {
         canvas.translate(shiftX, shiftY)
 
         for ((x, y, cell) in level.withCoordinates()) {
-            val (bm, bm2) = cell.toBitmaps()
-            val src = Rect(0, 0, bm.width, bm.height)
-            val dst = square(x.cell, y.cell, 1.cell)
-            canvas.drawBitmap(bm, src, dst, null)
-            bm2?.let { canvas.drawBitmap(it, src, dst, null) }
+            if (cell.discovered) {
+                val (bm, bm2) = cell.toBitmaps()
+                val src = Rect(0, 0, bm.width, bm.height)
+                val dst = square(x.cell, y.cell, 1.cell)
+                canvas.drawBitmap(bm, src, dst, null)
+                if (max(abs(x - level.playerPosition.x), abs(y - level.playerPosition.y)) <= Player.VISIBILITY_RANGE) {
+                    bm2?.let { canvas.drawBitmap(it, src, dst, null) }
+                } else {
+                    canvas.drawRect(dst, Paint().apply { color = Color.argb(100, 0, 0, 0) })
+                }
+            }
         }
+
 
         val gridPaint = Paint().apply { alpha = 20 }
 
@@ -50,8 +58,8 @@ class LevelDrawer(private val resources: Resources) {
         private val cache = mutableMapOf<Int, Bitmap>()
 
         operator fun get(id: Int) = cache[id] ?: (
-            BitmapFactory.decodeResource(resources, id) ?: error("Could not decode cell bitmap")
-        ).also { cache[id] = it }
+                BitmapFactory.decodeResource(resources, id) ?: error("Could not decode cell bitmap")
+                ).also { cache[id] = it }
     }
 
     private fun CellSnapshot.toBitmaps(): Pair<Bitmap, Bitmap?> {

@@ -11,12 +11,16 @@ class GameUpdater(private val view: GameView) {
     }
 
     private val player = LevelGeneration.generateLevelAndCreate { level, position ->
-        Player(level, position, view)
+        Player(level, position, view).also {
+            for ((pos, _) in level.withPosition().filter { (p, _) -> it.isVisible(p) }) {
+                it.discoveredCells.getValue(level)[pos.x][pos.y] = true
+            }
+        }
     }.second
 
     suspend fun run() {
         do {
-            view.snapshot = player.level.snapshot()
+            view.snapshot = player.level.snapshot(player)
             yield()
         } while (Game.update())
     }

@@ -61,14 +61,15 @@ class MainActivity : Activity(), CoroutineScope {
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             view.scaleFactor *= detector.scaleFactor
-            view.shiftX -= ((detector.scaleFactor - 1) * detector.focusX).toInt()
-            view.shiftY -= ((detector.scaleFactor - 1) * detector.focusY).toInt()
+            view.shiftX -= ((detector.scaleFactor - 1) / view.scaleFactor * detector.focusX).toInt()
+            view.shiftY -= ((detector.scaleFactor - 1) / view.scaleFactor * detector.focusY).toInt()
+            println(view.scaleFactor)
             return true
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            view.shiftX -= distanceX
-            view.shiftY -= distanceY
+            view.shiftX -= distanceX / view.scaleFactor
+            view.shiftY -= distanceY / view.scaleFactor
             return true
         }
     }

@@ -3,8 +3,6 @@ package me.arkadybazhanov.spacedust.core
 import me.arkadybazhanov.spacedust.core.CellType.*
 
 object LevelGeneration {
-    fun generateLevelAndPut(character: Character): Level = generateLevelAndCreate { _, _ -> character }.first
-
     inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
         val (level, position) = generateMaze(31, 31)
 
@@ -12,7 +10,6 @@ object LevelGeneration {
         character.position = position
         character.level = level
         character.create()
-
         return level to character
     }
 
@@ -81,5 +78,5 @@ object LevelGeneration {
     }
 
     private fun Level.defaultMonster(position: Position) =
-        BasicMonster(this, position, 15, 100, 10)
+        BasicMonster(this, position, 20, 100, 10)
 }
