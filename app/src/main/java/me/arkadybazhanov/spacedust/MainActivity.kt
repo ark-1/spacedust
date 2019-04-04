@@ -14,21 +14,17 @@ class MainActivity : Activity(), CoroutineScope {
     override val coroutineContext
         get() = Dispatchers.Default + job
 
-    private lateinit var gestureDetector: GestureDetectorCompat
-    private lateinit var scaleGestureDetector: ScaleGestureDetector
+    private val gestureDetector by lazy { GestureDetectorCompat(this, gestureListener) }
+    private val scaleGestureDetector by lazy { ScaleGestureDetector(this, gestureListener) }
 
-    private lateinit var view: GameView
+    private val view get() = findViewById<GameView>(R.id.game_view)!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        gestureDetector = GestureDetectorCompat(this, gestureListener)
-        scaleGestureDetector = ScaleGestureDetector(this, gestureListener)
-
         window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
 
         setContentView(R.layout.activity_main)
-        view = findViewById(R.id.game_view)!!
 
         job = Job()
         Game.reset()
@@ -60,15 +56,15 @@ class MainActivity : Activity(), CoroutineScope {
         }
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            view.scaleFactor *= detector.scaleFactor
-            view.shiftX -= (detector.scaleFactor - 1) / view.scaleFactor * detector.focusX
-            view.shiftY -= (detector.scaleFactor - 1) / view.scaleFactor * detector.focusY
+            view.camera.scaleFactor *= detector.scaleFactor
+            view.camera.shiftX -= (detector.scaleFactor - 1) / view.camera.scaleFactor * detector.focusX
+            view.camera.shiftY -= (detector.scaleFactor - 1) / view.camera.scaleFactor * detector.focusY
             return true
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            view.shiftX -= distanceX / view.scaleFactor
-            view.shiftY -= distanceY / view.scaleFactor
+            view.camera.shiftX -= distanceX / view.camera.scaleFactor
+            view.camera.shiftY -= distanceY / view.camera.scaleFactor
             return true
         }
     }

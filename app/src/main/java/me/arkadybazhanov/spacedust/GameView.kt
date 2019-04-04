@@ -13,7 +13,7 @@ class GameView(context: Context, attributes: AttributeSet) :
     SurfaceHolder.Callback,
     CoroutineScope {
 
-    private lateinit var drawer: LevelDrawer
+    private val drawer: LevelDrawer by lazy { LevelDrawer(resources) }
 
     private lateinit var job: Job
     override val coroutineContext
@@ -24,12 +24,14 @@ class GameView(context: Context, attributes: AttributeSet) :
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        drawer = LevelDrawer(resources, width)
         job = Job()
+
         launch {
             ViewUpdater.run(holder, this@GameView)
         }
     }
+
+    val camera by lazy { Camera(width) }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
 
@@ -38,27 +40,15 @@ class GameView(context: Context, attributes: AttributeSet) :
     }
 
     val playerMoves = Channel<Position>(Channel.UNLIMITED)
-
     var snapshot: LevelSnapshot? = null
-    var scaleFactor
-        get() = drawer.scaleFactor
-        set(value) { drawer.scaleFactor = value }
-
-    interface Adder {
-        operator fun plusAssign(d: Int)
-        operator fun minusAssign(d: Int) = plusAssign(-d)
-    }
-
-    val shiftX get() = drawer.shiftX
-    val shiftY get() = drawer.shiftY
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
 
-        snapshot?.let { drawer.drawLevel(it, canvas) }
+        snapshot?.let { drawer.drawLevel(it, canvas, camera) }
     }
 
     fun tap(x: Float, y: Float) {
-        playerMoves.offer(snapshot?.let { drawer.getCell(it, x, y) } ?: return)
+        playerMoves.offer(snapshot?.let { drawer.getCell(it, camera, x, y) } ?: return)
     }
 }

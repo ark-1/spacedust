@@ -8,12 +8,7 @@ import me.arkadybazhanov.spacedust.core.CellType.*
 import me.arkadybazhanov.spacedust.core.Position
 import kotlin.math.*
 
-class LevelDrawer(private val resources: Resources, width: Int) {
-    var scaleFactor = 412.0178f / width
-
-    val shiftX = AtomicFloat(Player.VISIBILITY_RANGE.cell)
-    val shiftY = AtomicFloat(Player.VISIBILITY_RANGE.cell)
-
+class LevelDrawer(private val resources: Resources) {
     private fun square(left: Float, top: Float, width: Float) = RectF(
         left,
         top,
@@ -21,10 +16,10 @@ class LevelDrawer(private val resources: Resources, width: Int) {
         top + width
     )
 
-    fun drawLevel(level: LevelSnapshot, canvas: Canvas) {
+    fun drawLevel(level: LevelSnapshot, canvas: Canvas, camera: Camera) {
         canvas.save()
-        canvas.scale(scaleFactor, scaleFactor)
-        canvas.translate(shiftX.value, shiftY.value)
+        canvas.scale(camera.scaleFactor, camera.scaleFactor)
+        canvas.translate(camera.shiftX.value, camera.shiftY.value)
 
         for ((x, y, cell) in level.withCoordinates()) {
             if (cell.discovered) {
@@ -75,10 +70,10 @@ class LevelDrawer(private val resources: Resources, width: Int) {
         return bitmaps[cellId] to id?.let { bitmaps[it] }
     }
 
-    fun getCell(level: LevelSnapshot, x: Float, y: Float): Position? {
+    fun getCell(level: LevelSnapshot, camera: Camera, x: Float, y: Float): Position? {
         val position = Position(
-            x = ((x / scaleFactor - shiftX.value) / CELL_WIDTH).toInt(),
-            y = ((y / scaleFactor - shiftY.value) / CELL_WIDTH).toInt()
+            x = ((x / camera.scaleFactor - camera.shiftX.value) / CELL_WIDTH).toInt(),
+            y = ((y / camera.scaleFactor - camera.shiftY.value) / CELL_WIDTH).toInt()
         )
         return position.takeIf { it.isValid(level.w, level.h) }
     }
