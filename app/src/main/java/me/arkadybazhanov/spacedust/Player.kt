@@ -7,6 +7,7 @@ import kotlinx.coroutines.*
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
 import java.lang.Math.*
+import java.util.concurrent.ConcurrentHashMap
 
 class Player(override var level: Level, position: Position, private val view: GameView) : Character {
 
@@ -40,22 +41,19 @@ class Player(override var level: Level, position: Position, private val view: Ga
     private val queuedMoves: Queue<Position> = ArrayDeque()
 
     private val globalCoordinateUpdater = object {
-        private val xDeltas = mutableMapOf<Int, Float>()
-        private val yDeltas = mutableMapOf<Int, Float>()
+        private val xDeltas = ConcurrentHashMap<Int, Float>()
+        private val yDeltas = ConcurrentHashMap<Int, Float>()
 
         fun addX(id: Int, deltaX: Float) {
-            if (id !in xDeltas) {
-                xDeltas[id] = 0f
-            }
+            xDeltas.putIfAbsent(id, 0f)
 
             view.shiftX -= xDeltas[id]!!
             xDeltas[id] = deltaX
             view.shiftX += xDeltas[id]!!
         }
+
         fun addY(id: Int, deltaY: Float) {
-            if (id !in yDeltas) {
-                yDeltas[id] = 0f
-            }
+            yDeltas.putIfAbsent(id, 0f)
 
             view.shiftY -= yDeltas[id]!!
             yDeltas[id] = deltaY

@@ -61,9 +61,8 @@ class MainActivity : Activity(), CoroutineScope {
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             view.scaleFactor *= detector.scaleFactor
-            view.shiftX -= ((detector.scaleFactor - 1) / view.scaleFactor * detector.focusX).toInt()
-            view.shiftY -= ((detector.scaleFactor - 1) / view.scaleFactor * detector.focusY).toInt()
-            println(view.scaleFactor)
+            view.shiftX -= (detector.scaleFactor - 1) / view.scaleFactor * detector.focusX
+            view.shiftY -= (detector.scaleFactor - 1) / view.scaleFactor * detector.focusY
             return true
         }
 

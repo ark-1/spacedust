@@ -13,7 +13,7 @@ class GameView(context: Context, attributes: AttributeSet) :
     SurfaceHolder.Callback,
     CoroutineScope {
 
-    private val drawer = LevelDrawer(resources)
+    private lateinit var drawer: LevelDrawer
 
     private lateinit var job: Job
     override val coroutineContext
@@ -24,6 +24,7 @@ class GameView(context: Context, attributes: AttributeSet) :
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        drawer = LevelDrawer(resources, width)
         job = Job()
         launch {
             ViewUpdater.run(holder, this@GameView)
@@ -39,12 +40,21 @@ class GameView(context: Context, attributes: AttributeSet) :
     val playerMoves = Channel<Position>(Channel.UNLIMITED)
 
     var snapshot: LevelSnapshot? = null
-    var scaleFactor by drawer::scaleFactor
-    var shiftX by drawer::shiftX
-    var shiftY by drawer::shiftY
+    var scaleFactor
+        get() = drawer.scaleFactor
+        set(value) { drawer.scaleFactor = value }
+
+    interface Adder {
+        operator fun plusAssign(d: Int)
+        operator fun minusAssign(d: Int) = plusAssign(-d)
+    }
+
+    val shiftX get() = drawer.shiftX
+    val shiftY get() = drawer.shiftY
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
+
         snapshot?.let { drawer.drawLevel(it, canvas) }
     }
 
