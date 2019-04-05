@@ -1,7 +1,13 @@
 package me.arkadybazhanov.spacedust.core
 
-class BasicMonster(override var level: Level, override var position: Position,
-                   var speed: Int, var maxHp: Int, var strength: Int) : Character {
+class BasicMonster(
+    override var level: Level,
+    override var position: Position,
+    var speed: Int,
+    var maxHp: Int,
+    var strength: Int,
+    override val id: Int = Game.getNextId()
+) : Character {
 
     override fun canMoveTo(position: Position): Boolean {
         return position.x in (0 until level.w)
@@ -13,9 +19,7 @@ class BasicMonster(override var level: Level, override var position: Position,
         return true
     }
 
-    override val id: Int = Game.getNextId()
-
-    override suspend fun getNextEvent(): PerformableEvent {
+    override suspend fun getNextEvent(): Action {
         for (position in nearList(position).shuffled(Game.random)) {
             val cell = level[position]
             if (!cell.isEmpty()) {
@@ -35,4 +39,6 @@ class BasicMonster(override var level: Level, override var position: Position,
     companion object {
         val canStandIn = listOf(CellType.AIR)
     }
+
+    override fun toString() = "BasicMonster(id=$id)"
 }

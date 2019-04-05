@@ -63,7 +63,7 @@ object LevelGeneration {
         @Suppress("UNCHECKED_CAST")
         return Level(cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
-                if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.05)) {
+                if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
                 }
             }
@@ -72,8 +72,8 @@ object LevelGeneration {
                 level = level,
                 duration = 40,
                 delay = 100,
-                positionValidator = { level[it].type in BasicMonster.canStandIn }
-            ) { level.defaultMonster(it) }
+                positionValidator = { lvl, pos -> lvl[pos].type in BasicMonster.canStandIn }
+            ) { lvl, pos -> lvl.defaultMonster(pos) }
         } to Position(1, 1)
     }
 

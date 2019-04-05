@@ -1,6 +1,6 @@
 package me.arkadybazhanov.spacedust.core
 
-class Cell(val type: CellType) {
+class Cell(var type: CellType) {
     val events = mutableListOf<Event>()
     var character: Character? = null
 
@@ -11,16 +11,7 @@ enum class CellType {
     STONE, AIR
 }
 
-data class Position(val x: Int, val y: Int) {
-    operator fun plus(other: Direction): Position = Position(x + other.x, y + other.y)
-    operator fun minus(other: Position): Direction = Direction(x - other.x, y - other.y)
-
-    fun isValid(w: Int, h: Int) = x in (0 until w) && y in (0 until h)
-}
-
-data class Direction(val x: Int, val y: Int)
-
-class Level(private val cells: Array<Array<Cell>>) : Iterable<Cell> {
+class Level(private val cells: Array<Array<Cell>>, val id: Int = Game.getNextId()) : Iterable<Cell> {
     init {
         require(cells.isNotEmpty())
     }
@@ -42,4 +33,10 @@ class Level(private val cells: Array<Array<Cell>>) : Iterable<Cell> {
 
     operator fun get(position: Position): Cell = cells[position.x][position.y]
     operator fun get(x: Int, y: Int): Cell = cells[x][y]
+}
+
+inline fun <reified T> array2D(w: Int, h: Int, init: (Int, Int) -> T) = Array(w) { x ->
+    Array(h) { y ->
+        init(x, y)
+    }
 }

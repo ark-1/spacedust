@@ -2,9 +2,12 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
 }
 
+apply plugin: 'kotlinx-serialization'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.10.0"
 }
 
 sourceCompatibility = "7"

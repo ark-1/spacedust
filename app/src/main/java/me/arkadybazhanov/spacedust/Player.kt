@@ -4,7 +4,13 @@ import java.util.*
 import me.arkadybazhanov.spacedust.core.*
 import java.lang.Math.*
 
-class Player(override var level: Level, position: Position, private val view: GameView) : Character {
+class Player(
+    override var level: Level,
+    position: Position,
+    val view: GameView,
+    override val id: Int = -1
+) : Character {
+
     override var position = position
         set(value) {
             field = value
@@ -22,25 +28,19 @@ class Player(override var level: Level, position: Position, private val view: Ga
         return max(abs(position.x - this.position.x), abs(position.y - this.position.y)) <= VISIBILITY_RANGE
     }
 
-    override val id: Int get() = -1
-
-    private fun putLevel(level: Level, it: Array<BooleanArray>) {
-        discoveredCells[level] = it
-    }
-
-    val discoveredCells: MutableMap<Level, Array<BooleanArray>> = mutableMapOf<Level, Array<BooleanArray>>().withDefault { level ->
-        Array(level.h) { BooleanArray(level.w) }.also { putLevel(level, it) }
+    val discoveredCells = Cache<Level, Array<BooleanArray>> { level ->
+        Array(level.h) { BooleanArray(level.w) }
     }
 
     private val queuedMoves: Queue<Position> = ArrayDeque()
 
-    private fun updateDiscovered() {
+    fun updateDiscovered() {
         for ((position, _) in level.withPosition().filter { (p, _) -> isVisible(p) }) {
-            discoveredCells.getValue(level)[position.x][position.y] = true
+            discoveredCells[level][position.x][position.y] = true
         }
     }
 
-    override suspend fun getNextEvent(): PerformableEvent {
+    override suspend fun getNextEvent(): Action {
 
         if (!queuedMoves.isEmpty()) {
             val position = queuedMoves.remove()
@@ -81,4 +81,6 @@ class Player(override var level: Level, position: Position, private val view: Ga
     companion object {
         const val VISIBILITY_RANGE = 3
     }
+
+    override fun toString() = "Player(id=$id)"
 }
