@@ -5,7 +5,14 @@ import me.arkadybazhanov.spacedust.core.CellType.*
 object LevelGeneration {
     inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
         val (level, position) = generateMaze(31, 31)
+        return create(level, position, characterSupplier)
+    }
 
+    inline fun <T : Character> create(
+        level: Level,
+        position: Position,
+        characterSupplier: (Level, Position) -> T
+    ): Pair<Level, T> {
         val character = characterSupplier(level, position)
         character.position = position
         character.level = level
@@ -23,14 +30,12 @@ object LevelGeneration {
         val edges = mutableSetOf<Position>()
         val connectivity = UnionFind<Position>()
 
-        val cells = Array(w) { x ->
-            Array(h) { y ->
-                when {
-                    x == 0 || y == 0 || x == w - 1 || y == h - 1 -> Cell(STONE)
-                    (x + y) % 2 == 1 -> null.also { edges += Position(x, y) }
-                    x % 2 == 0 -> Cell(STONE)
-                    else -> Cell(AIR)
-                }
+        val cells = array2D(w, h) { x, y ->
+            when {
+                x == 0 || y == 0 || x == w - 1 || y == h - 1 -> Cell(STONE)
+                (x + y) % 2 == 1 -> null.also { edges += Position(x, y) }
+                x % 2 == 0 -> Cell(STONE)
+                else -> Cell(AIR)
             }
         }
 
@@ -79,4 +84,23 @@ object LevelGeneration {
 
     private fun Level.defaultMonster(position: Position) =
         BasicMonster(this, position, 20, 100, 10)
+
+    fun generateSmallRoom(): Pair<Level, Position> {
+        val level = Level(array2D(3, 3) { _, _ ->
+            Cell(AIR)
+        })
+
+        level.withPosition().shuffled(Game.random).first { (pos, _) ->
+            pos.y != 0 || pos.x == 1
+        }.second.type = STONE
+
+        level.createDefaultMonster(Position(2, 0))
+
+        return level to Position(0, 0)
+    }
+
+    inline fun <T : Character> generateSmallRoomAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
+        val (level, position) = generateSmallRoom()
+        return create(level, position, characterSupplier)
+    }
 }

@@ -46,6 +46,10 @@ class Player(
             val position = queuedMoves.remove()
             var danger = false
             for (to in near(position)) {
+                if (!to.isValid(level.w, level.h)) {
+                    continue
+                }
+
                 if (!level[to].isEmpty() && to != this.position) {
                     danger = true
                 }

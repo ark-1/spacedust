@@ -20,7 +20,7 @@ class BasicMonster(
     }
 
     override suspend fun getNextEvent(): Action {
-        for (position in nearList(position).shuffled(Game.random)) {
+        for (position in nearList(position).filter { it.isValid(level.w, level.h) }.shuffled(Game.random)) {
             val cell = level[position]
             if (!cell.isEmpty()) {
                 return Attack(this, cell.character!!, Game.time, speed)
