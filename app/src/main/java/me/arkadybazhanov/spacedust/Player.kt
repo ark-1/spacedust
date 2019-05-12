@@ -41,11 +41,10 @@ class Player(override var level: Level, position: Position, private val view: Ga
     }
 
     override suspend fun getNextEvent(): PerformableEvent {
-
         if (!queuedMoves.isEmpty()) {
             val position = queuedMoves.remove()
             var danger = false
-            for (to in near(position)) {
+            for (to in nearList(position) + position) {
                 if (!level[to].isEmpty() && to != this.position) {
                     danger = true
                 }
@@ -70,7 +69,6 @@ class Player(override var level: Level, position: Position, private val view: Ga
         } else {
             if (path.size == 1) {
                 view.camera.move(path[0] - this.position)
-
                 return Move(this, path[0], Game.time, 20)
             }
             queuedMoves += path

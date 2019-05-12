@@ -8,7 +8,7 @@ import me.arkadybazhanov.spacedust.core.Direction
 import java.util.concurrent.ConcurrentHashMap
 
 class Camera(width: Int) {
-    var scaleFactor = 412.0178f / width
+    var scaleFactor = 1.7189566f
 
     val shiftX = AtomicFloat(Player.VISIBILITY_RANGE.cell)
     val shiftY = AtomicFloat(Player.VISIBILITY_RANGE.cell)
