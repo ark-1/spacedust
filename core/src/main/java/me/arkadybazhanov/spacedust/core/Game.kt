@@ -1,23 +1,17 @@
 package me.arkadybazhanov.spacedust.core
 
+import kotlinx.serialization.Serializable
 import java.util.PriorityQueue
 import kotlin.random.Random
 
-object Game {
+class Game(override val saveId: Int = getNextId()) : Savable {
+    var time: Int = 0
+        private set
+
     val characters = PriorityQueue<Pair<Int, EventGenerator>>(
         11,
         compareBy({ it.first }, { it.second })
     )
-
-    val seed = System.nanoTime()
-    val random = Random(seed)
-    fun withProbability(probability: Double) = random.nextDouble() < probability
-
-    private var nextId = 0
-    var time: Int = 0
-        private set
-
-    fun getNextId() = nextId++
 
     var current: EventGenerator? = null
 
@@ -38,5 +32,34 @@ object Game {
         return true
     }
 
-    fun reset() = characters.clear()
+    override fun save(): SavedGame = SavedGame(saveId, time, characters.map { it.first to it.second.saveId }, current?.saveId)
+
+    @Serializable
+    data class SavedGame(
+        val id: Int,
+        val time: Int,
+        val characters: List<Pair<Int, Int>>,
+        val current: Int?
+    ) : SavedWeak<Game> {
+        override val refs = characters.map(Pair<Int, Int>::second)
+
+        override fun initial() = Game(id).also { it.time = time }
+
+        override fun restore(initial: Game, pool: Map<Int, Savable>) {
+            initial.characters.addAll(characters.map { it.first to (pool[it.second] as EventGenerator) })
+            if (current != null) {
+                initial.current = pool[current] as EventGenerator
+            }
+        }
+
+    }
+
+    companion object {
+        val seed = System.nanoTime()
+        val random = Random(seed)
+        fun withProbability(probability: Double) = random.nextDouble() < probability
+
+        private var nextId = 0
+        fun getNextId() = nextId++
+    }
 }

@@ -1,5 +1,7 @@
 package me.arkadybazhanov.spacedust
 
+import android.support.annotation.IdRes
+import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
 import java.lang.Math.*
@@ -7,9 +9,9 @@ import java.lang.Math.*
 class Player(
     override var level: Level,
     position: Position,
-    val view: GameView,
-    override val id: Int = -1
+    val view: GameView
 ) : Character {
+    override val saveId: Int = -1
 
     override var position = position
         set(value) {
@@ -58,7 +60,7 @@ class Player(
                 queuedMoves.clear()
             } else {
                 view.camera.move(position - this.position)
-                return Move(this, position, Game.time, 20)
+                return Move(this, position, game.time, 20)
             }
         }
 
@@ -70,12 +72,12 @@ class Player(
         } while (path == null || !canMoveTo(position) || (!level[position].isEmpty() && !isNear(position)))
 
         return if (!level[position].isEmpty()) {
-            Attack(this, level[position].character!!, Game.time, 10)
+            Attack(this, level[position].character!!, game.time, 10)
         } else {
             if (path.size == 1) {
                 view.camera.move(path[0] - this.position)
 
-                return Move(this, path[0], Game.time, 20)
+                return Move(this, path[0], game.time, 20)
             }
             queuedMoves += path
             getNextEvent()
@@ -86,5 +88,13 @@ class Player(
         const val VISIBILITY_RANGE = 3
     }
 
-    override fun toString() = "Player(id=$id)"
+    override fun toString() = "Player(id=$saveId)"
+
+    @Serializable
+    data class SavedPlayer(val level: Int, val position: Position, @IdRes val view: Int) : SavedStrong<Player> {
+        override val refs = listOf(level)
+        override fun initial(pool: Map<Int, Savable>): Player = Player(pool.load(level), position, pool.load(view))
+    }
+
+    override fun save() = SavedPlayer(level.saveId, position, view.saveId)
 }

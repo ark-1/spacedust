@@ -1,10 +1,11 @@
 package me.arkadybazhanov.spacedust.core
 
+import kotlinx.serialization.Serializable
 import me.arkadybazhanov.spacedust.core.CellType.*
 
 object LevelGeneration {
-    inline fun <T : Character> generateLevelAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateMaze(31, 31)
+    inline fun <T : Character> generateLevelAndCreate(game: Game, characterSupplier: (Level, Position) -> T): Pair<Level, T> {
+        val (level, position) = generateMaze(game, 31, 31)
         return create(level, position, characterSupplier)
     }
 
@@ -24,7 +25,7 @@ object LevelGeneration {
         defaultMonster(position).create()
     }
 
-    fun generateMaze(w: Int, h: Int): Pair<Level, Position> {
+    fun generateMaze(game: Game, w: Int, h: Int): Pair<Level, Position> {
         require(w > 2 && h > 2) { "width and height should be > 2 (w = $w, h = $h)" }
 
         val edges = mutableSetOf<Position>()
@@ -66,27 +67,41 @@ object LevelGeneration {
         val startPos = Position(1, 1)
 
         @Suppress("UNCHECKED_CAST")
-        return Level(cells as Array<Array<Cell>>).also { level ->
+        return Level(game, cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
                 if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
                 }
             }
 
-            Game.characters += Game.time to MonsterSpawner(
-                level = level,
-                duration = 40,
-                delay = 100,
-                positionValidator = { lvl, pos -> lvl[pos].type in BasicMonster.canStandIn }
-            ) { lvl, pos -> lvl.defaultMonster(pos) }
+            game.characters += game.time to DefaultMonsterSpawner(level)
         } to Position(1, 1)
+    }
+
+    class DefaultMonsterSpawner(level: Level) : MonsterSpawner(level, duration = 40, delay = 100) {
+
+        override fun positionValidator(position: Position): Boolean {
+            return level[position].type in BasicMonster.canStandIn
+        }
+
+        override fun spawn(position: Position): Character {
+            return level.defaultMonster(position)
+        }
+
+        @Serializable
+        data class SavedDefaultMonsterSpawner(val level: Int) : SavedStrong<DefaultMonsterSpawner> {
+            override val refs = listOf(level)
+            override fun initial(pool: Map<Int, Savable>) = DefaultMonsterSpawner(pool.load(level))
+        }
+
+        override fun save() = SavedDefaultMonsterSpawner(level.saveId)
     }
 
     private fun Level.defaultMonster(position: Position) =
         BasicMonster(this, position, 20, 100, 10)
 
-    fun generateSmallRoom(): Pair<Level, Position> {
-        val level = Level(array2D(3, 3) { _, _ ->
+    fun generateSmallRoom(game: Game): Pair<Level, Position> {
+        val level = Level(game, array2D(3, 3) { _, _ ->
             Cell(AIR)
         })
 
@@ -99,8 +114,11 @@ object LevelGeneration {
         return level to Position(0, 0)
     }
 
-    inline fun <T : Character> generateSmallRoomAndCreate(characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateSmallRoom()
+    inline fun <T : Character> generateSmallRoomAndCreate(
+        game: Game,
+        characterSupplier: (Level, Position) -> T
+    ): Pair<Level, T> {
+        val (level, position) = generateSmallRoom(game)
         return create(level, position, characterSupplier)
     }
 }

@@ -8,7 +8,7 @@ import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.cbor.Cbor
-import me.arkadybazhanov.spacedust.core.Game
+import me.arkadybazhanov.spacedust.core.*
 
 class MainActivity : Activity(), CoroutineScope {
 
@@ -26,12 +26,13 @@ class MainActivity : Activity(), CoroutineScope {
 
         setContentView(R.layout.activity_main)
 
-        job = Job()
-        Game.reset()
+        val egCache = Cache<Int, Saved<*>> {
+            savedInstanceState.getString("sd $it")
+        }
 
         val game = savedInstanceState.also {
             println(it == null)
-        }?.getByteArray(SerializableGame::class.simpleName).also {
+        }?.getByteArray("game").also {
             println(it?.size)
         }
 
@@ -41,6 +42,7 @@ class MainActivity : Activity(), CoroutineScope {
         }
 
         val player = Game.current as? Player ?: Game.characters.singleOrNull { it.second is Player }?.second as Player?
+        job = Job()
         launch {
             GameUpdater(gameView, player).run()
         }

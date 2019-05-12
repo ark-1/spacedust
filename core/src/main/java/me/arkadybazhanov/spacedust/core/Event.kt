@@ -1,10 +1,15 @@
 package me.arkadybazhanov.spacedust.core
 
-interface Event {
+import kotlinx.serialization.Serializable
+
+interface Event : Savable {
     val time: Int
-    val cell: Cell?
+    val level: Level?
+    val position: Position
     val duration: Int
 }
+
+val Event.cell get() = level?.get(position)
 
 interface Action {
     fun perform(): Event
@@ -20,9 +25,35 @@ class Move(
     class MoveEvent(
         val character: Character,
         override val time: Int,
-        override val duration: Int
+        override val duration: Int,
+        override val saveId: Int = Game.getNextId()
     ) : Event {
-        override val cell = character.cell
+        override val level = character.level
+        override val position = character.position
+
+        @Serializable
+        data class SavedMoveEvent(
+            val id: Int,
+            val character: Int,
+            val time: Int,
+            val duration: Int
+        ) : SavedStrong<MoveEvent> {
+            override val refs = listOf(character)
+
+            override fun initial(pool: Map<Int, Savable>) = MoveEvent(
+                character = pool.load(character),
+                time = time,
+                duration = duration,
+                saveId = id
+            )
+        }
+
+        override fun save() = SavedMoveEvent(
+            id = saveId,
+            character = character.saveId,
+            time = time,
+            duration = duration
+        )
     }
 
     override fun perform(): MoveEvent {
@@ -45,9 +76,39 @@ class Attack(
         val attacker: Character,
         val defender: Character,
         override val time: Int,
-        override val duration: Int
+        override val duration: Int,
+        override val saveId: Int = Game.getNextId()
     ) : Event {
-        override val cell = attacker.cell
+
+        override val level = attacker.level
+        override val position = attacker.position
+
+        @Serializable
+        data class SavedAttackEvent(
+            val id: Int,
+            val attacker: Int,
+            val defender: Int,
+            val time: Int,
+            val duration: Int
+        ) : SavedStrong<AttackEvent> {
+            override val refs = listOf(attacker, defender)
+
+            override fun initial(pool: Map<Int, Savable>) = AttackEvent(
+                attacker = pool.load(attacker),
+                defender = pool.load(defender),
+                time = time,
+                duration = duration,
+                saveId = id
+            )
+        }
+
+        override fun save() = SavedAttackEvent(
+            id = saveId,
+            attacker = attacker.saveId,
+            defender = defender.saveId,
+            time = time,
+            duration = duration
+        )
     }
 
     override fun perform(): AttackEvent {
@@ -57,7 +118,7 @@ class Attack(
 }
 
 class Spawn(
-    val time: Int,
+    private val time: Int,
     private val duration: Int,
     private val delay: Int,
     private val spawn: () -> Character
@@ -66,9 +127,36 @@ class Spawn(
     class SpawnEvent(
         override val time: Int,
         override val duration: Int,
-        val character: Character
+        val character: Character,
+        override val saveId: Int = Game.getNextId()
     ) : Event {
-        override val cell = character.cell
+
+        override val level = character.level
+        override val position = character.position
+
+        @Serializable
+        data class SavedSpawnEvent(
+            val id: Int,
+            val time: Int,
+            val duration: Int,
+            val character: Int
+        ) : SavedStrong<SpawnEvent> {
+            override val refs = listOf(character)
+
+            override fun initial(pool: Map<Int, Savable>) = SpawnEvent(
+                time = time,
+                duration = duration,
+                character = pool.load(character),
+                saveId = id
+            )
+        }
+
+        override fun save(): SavedSpawnEvent = SavedSpawnEvent(
+            id = saveId,
+            time = time,
+            duration = duration,
+            character = character.saveId
+        )
     }
 
     override fun perform(): SpawnEvent {
