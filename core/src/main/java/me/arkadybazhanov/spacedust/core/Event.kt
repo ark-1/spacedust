@@ -28,28 +28,30 @@ class Move(
         override val duration: Int,
         override val saveId: Int = Game.getNextId()
     ) : Event {
-        override val level = character.level
-        override val position = character.position
+        override val refs = listOf(character)
+
+        override val level get() = character.level
+        override val position get() = character.position
 
         @Serializable
         data class SavedMoveEvent(
-            val id: Int,
+            override val saveId: Int,
             val character: Int,
             val time: Int,
             val duration: Int
         ) : SavedStrong<MoveEvent> {
             override val refs = listOf(character)
 
-            override fun initial(pool: Map<Int, Savable>) = MoveEvent(
+            override fun initial(pool: Pool) = MoveEvent(
                 character = pool.load(character),
                 time = time,
                 duration = duration,
-                saveId = id
+                saveId = saveId
             )
         }
 
         override fun save() = SavedMoveEvent(
-            id = saveId,
+            saveId = saveId,
             character = character.saveId,
             time = time,
             duration = duration
@@ -79,13 +81,14 @@ class Attack(
         override val duration: Int,
         override val saveId: Int = Game.getNextId()
     ) : Event {
+        override val refs = listOf(attacker, defender)
 
-        override val level = attacker.level
-        override val position = attacker.position
+        override val level get() = attacker.level
+        override val position get() = attacker.position
 
         @Serializable
         data class SavedAttackEvent(
-            val id: Int,
+            override val saveId: Int,
             val attacker: Int,
             val defender: Int,
             val time: Int,
@@ -93,17 +96,17 @@ class Attack(
         ) : SavedStrong<AttackEvent> {
             override val refs = listOf(attacker, defender)
 
-            override fun initial(pool: Map<Int, Savable>) = AttackEvent(
+            override fun initial(pool: Pool) = AttackEvent(
                 attacker = pool.load(attacker),
                 defender = pool.load(defender),
                 time = time,
                 duration = duration,
-                saveId = id
+                saveId = saveId
             )
         }
 
         override fun save() = SavedAttackEvent(
-            id = saveId,
+            saveId = saveId,
             attacker = attacker.saveId,
             defender = defender.saveId,
             time = time,
@@ -130,29 +133,30 @@ class Spawn(
         val character: Character,
         override val saveId: Int = Game.getNextId()
     ) : Event {
+        override val refs = listOf(character)
 
-        override val level = character.level
-        override val position = character.position
+        override val level get() = character.level
+        override val position get() = character.position
 
         @Serializable
         data class SavedSpawnEvent(
-            val id: Int,
+            override val saveId: Int,
             val time: Int,
             val duration: Int,
             val character: Int
         ) : SavedStrong<SpawnEvent> {
             override val refs = listOf(character)
 
-            override fun initial(pool: Map<Int, Savable>) = SpawnEvent(
+            override fun initial(pool: Pool) = SpawnEvent(
                 time = time,
                 duration = duration,
                 character = pool.load(character),
-                saveId = id
+                saveId = saveId
             )
         }
 
         override fun save(): SavedSpawnEvent = SavedSpawnEvent(
-            id = saveId,
+            saveId = saveId,
             time = time,
             duration = duration,
             character = character.saveId

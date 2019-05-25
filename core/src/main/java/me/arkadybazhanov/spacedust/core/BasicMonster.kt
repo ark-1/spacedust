@@ -10,6 +10,8 @@ class BasicMonster(
     var strength: Int,
     override val saveId: Int = Game.getNextId()
 ) : Character {
+    override val refs: Iterable<Savable> get() = listOf(level)
+
     override fun canMoveTo(position: Position): Boolean {
         return position.x in (0 until level.w)
                 && position.y in (0 until level.h)
@@ -47,7 +49,7 @@ class BasicMonster(
 
     @Serializable
     data class SavedBasicMonster(
-        val id: Int,
+        override val saveId: Int,
         val level: Int,
         val position: Position,
         val speed: Int,
@@ -56,7 +58,7 @@ class BasicMonster(
     ) : SavedStrong<BasicMonster> {
         override val refs = listOf(level)
 
-        override fun initial(pool: Map<Int, Savable>): BasicMonster =
-            BasicMonster(pool[level] as Level, position, speed, maxHp, strength, id)
+        override fun initial(pool: Pool): BasicMonster =
+            BasicMonster(pool.load(level), position, speed, maxHp, strength, saveId)
     }
 }

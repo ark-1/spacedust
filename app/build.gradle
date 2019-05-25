@@ -43,6 +43,7 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
-        freeCompilerArgs = ["-XXLanguage:+InlineClasses"]
+        freeCompilerArgs = ["-XXLanguage:+InlineClasses", "-Xuse-experimental=kotlin.Experimental"]
+        freeCompilerArgs += "-Xuse-experimental=kotlinx.serialization.ImplicitReflectionSerializer"
     }
 }

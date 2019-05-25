@@ -18,12 +18,13 @@ class Level(
     private val cells: Array2D<Cell>,
     override val saveId: Int = Game.getNextId()
 ) : Iterable<Cell>, Savable {
+    override val refs get() = cells.flatMap { it.flatMap(Cell::events) } + game
+
     init {
         require(cells.isNotEmpty())
     }
 
     val w = cells.size
-
     val h = cells[0].size
 
     override fun iterator(): Iterator<Cell> = iterator {
@@ -41,21 +42,22 @@ class Level(
 
     operator fun get(x: Int, y: Int): Cell = cells[x][y]
 
+    @Serializable
     data class SavedCell(val type: CellType, val events: List<Int>, val character: Int?)
 
     @Serializable
     class SavedLevel(
-        val id: Int,
+        override val saveId: Int,
         val game: Int,
         val cells: Array2D<SavedCell>
     ) : SavedStrong<Level> {
         override val refs = cells.flatMap { it.flatMap(SavedCell::events) }
 
-        override fun initial(pool: Map<Int, Savable>) = Level(pool.load(game), cells.map {
+        override fun initial(pool: Pool) = Level(pool.load(game), cells.map {
             Cell(it.type)
         })
 
-        override fun restore(initial: Level, pool: Map<Int, Savable>) {
+        override fun restore(initial: Level, pool: Pool) {
             for ((pos, cell) in initial.withPosition()) {
                 val savedCell = cells[pos.x][pos.y]
                 if (savedCell.character != null) {

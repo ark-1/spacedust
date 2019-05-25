@@ -5,6 +5,10 @@ import java.util.PriorityQueue
 import kotlin.random.Random
 
 class Game(override val saveId: Int = getNextId()) : Savable {
+    override val refs get() = characters.map { it.second }.run {
+        current?.let { plus(it) } ?: this
+    }
+
     var time: Int = 0
         private set
 
@@ -16,7 +20,7 @@ class Game(override val saveId: Int = getNextId()) : Savable {
     var current: EventGenerator? = null
 
     suspend fun update(): Boolean {
-        val next = current.also { println("current is $it") } ?: run {
+        val next = current ?: run {
             val next = characters.poll() ?: return false
             time = next.first
             current = next.second
@@ -36,16 +40,16 @@ class Game(override val saveId: Int = getNextId()) : Savable {
 
     @Serializable
     data class SavedGame(
-        val id: Int,
+        override val saveId: Int,
         val time: Int,
         val characters: List<Pair<Int, Int>>,
         val current: Int?
     ) : SavedWeak<Game> {
         override val refs = characters.map(Pair<Int, Int>::second)
 
-        override fun initial() = Game(id).also { it.time = time }
+        override fun initial() = Game(saveId).also { it.time = time }
 
-        override fun restore(initial: Game, pool: Map<Int, Savable>) {
+        override fun restore(initial: Game, pool: Pool) {
             initial.characters.addAll(characters.map { it.first to (pool[it.second] as EventGenerator) })
             if (current != null) {
                 initial.current = pool[current] as EventGenerator

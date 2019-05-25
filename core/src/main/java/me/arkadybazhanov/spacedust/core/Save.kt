@@ -3,12 +3,14 @@ package me.arkadybazhanov.spacedust.core
 interface Savable {
     val saveId: Int
     fun save(): Saved<*>
+    val refs: Iterable<Savable>
 }
 
 interface Saved<in I : Savable> {
+    val saveId: Int
     val refs: Iterable<Int>
 
-    fun restore(initial: I, pool: Map<Int, Savable>)
+    fun restore(initial: I, pool: Pool)
 }
 
 interface SavedWeak<I : Savable> : Saved<I> {
@@ -16,12 +18,16 @@ interface SavedWeak<I : Savable> : Saved<I> {
 }
 
 interface SavedStrong<I : Savable> : Saved<I> {
-    fun initial(pool: Map<Int, Savable>): I
+    fun initial(pool: Pool): I
 
-    override fun restore(initial: I, pool: Map<Int, Savable>) {}
+    override fun restore(initial: I, pool: Pool) {}
 }
 
-inline fun <reified T : Savable> Map<Int, Savable>.load(id: Int): T = this[id] as T
+interface Pool {
+    operator fun get(id: Int): Savable
+}
 
-inline fun <reified T : Savable> List<Int>.loadEach(pool: Map<Int, Savable>): Iterable<T> =
+inline fun <reified T : Savable> Pool.load(id: Int): T = this[id] as T
+
+inline fun <reified T : Savable> List<Int>.loadEach(pool: Pool): Iterable<T> =
     asSequence().map { pool[it] as T }.asIterable()

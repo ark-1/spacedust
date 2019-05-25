@@ -79,7 +79,6 @@ object LevelGeneration {
     }
 
     class DefaultMonsterSpawner(level: Level) : MonsterSpawner(level, duration = 40, delay = 100) {
-
         override fun positionValidator(position: Position): Boolean {
             return level[position].type in BasicMonster.canStandIn
         }
@@ -89,12 +88,12 @@ object LevelGeneration {
         }
 
         @Serializable
-        data class SavedDefaultMonsterSpawner(val level: Int) : SavedStrong<DefaultMonsterSpawner> {
+        data class SavedDefaultMonsterSpawner(override val saveId: Int, val level: Int) : SavedStrong<DefaultMonsterSpawner> {
             override val refs = listOf(level)
-            override fun initial(pool: Map<Int, Savable>) = DefaultMonsterSpawner(pool.load(level))
+            override fun initial(pool: Pool) = DefaultMonsterSpawner(pool.load(level))
         }
 
-        override fun save() = SavedDefaultMonsterSpawner(level.saveId)
+        override fun save() = SavedDefaultMonsterSpawner(saveId, level.saveId)
     }
 
     private fun Level.defaultMonster(position: Position) =

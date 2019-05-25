@@ -7,12 +7,11 @@ import android.view.*
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.cbor.Cbor
-import me.arkadybazhanov.spacedust.core.*
 
 class MainActivity : Activity(), CoroutineScope {
 
     private lateinit var job: Job
+    private lateinit var gameUpdater: GameUpdater
     override val coroutineContext
         get() = Dispatchers.Default + job
 
@@ -26,36 +25,46 @@ class MainActivity : Activity(), CoroutineScope {
 
         setContentView(R.layout.activity_main)
 
-        val egCache = Cache<Int, Saved<*>> {
-            savedInstanceState.getString("sd $it")
-        }
+        savedInstanceState?.let { state = it }
+    }
 
-        val game = savedInstanceState.also {
-            println(it == null)
-        }?.getByteArray("game").also {
-            println(it?.size)
-        }
+    override fun onResume() {
+        super.onResume()
 
-        if (game != null) {
-            Cbor.load(SerializableGame.serializer(), game).restore(this)
-            println("s")
-        }
+        val savedInstanceState = state
 
-        val player = Game.current as? Player ?: Game.characters.singleOrNull { it.second is Player }?.second as Player?
+        val player = savedInstanceState?.let {
+            val kClasses = savedInstanceState.getStringArray(SerializedState::kClasses.name) ?: return@let null
+            val values = savedInstanceState.getStringArray(SerializedState::values.name) ?: return@let null
+            SerializedState(kClasses = kClasses, values = values)
+        }?.let { it.restorePlayer(gameView) }
+
         job = Job()
         launch {
-            GameUpdater(gameView, player).run()
+            gameUpdater = GameUpdater(gameView, player)
+            gameUpdater.run()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        runBlocking { job.cancelAndJoin() }
+
+        val serializedState = serialize(gameUpdater.player)
+
+        state = Bundle().apply {
+            putStringArray(SerializedState::kClasses.name, serializedState.kClasses)
+            putStringArray(SerializedState::values.name, serializedState.values)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        runBlocking { job.cancelAndJoin() }
-        outState.putByteArray(
-            SerializableGame::class.simpleName,
-            Cbor.dump(SerializableGame.serializer(), SerializableGame()).also { println(it.size) }
-        )
+        outState.putAll(state)
     }
+
+    private var state: Bundle? = null
 
     override fun onDestroy() {
         super.onDestroy()

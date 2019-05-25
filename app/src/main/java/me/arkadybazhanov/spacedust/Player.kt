@@ -11,7 +11,9 @@ class Player(
     position: Position,
     val view: GameView
 ) : Character {
-    override val saveId: Int = -1
+    override val refs get() = listOf(level)
+
+    override val saveId: Int get() = PLAYER_SAVE_ID
 
     override var position = position
         set(value) {
@@ -86,15 +88,17 @@ class Player(
 
     companion object {
         const val VISIBILITY_RANGE = 3
+        const val PLAYER_SAVE_ID = -1
     }
 
     override fun toString() = "Player(id=$saveId)"
 
     @Serializable
     data class SavedPlayer(val level: Int, val position: Position, @IdRes val view: Int) : SavedStrong<Player> {
+        override val saveId: Int get() = PLAYER_SAVE_ID
         override val refs = listOf(level)
-        override fun initial(pool: Map<Int, Savable>): Player = Player(pool.load(level), position, pool.load(view))
+        override fun initial(pool: Pool): Player = Player(pool.load(level), position, (pool as CachePool).view)
     }
 
-    override fun save() = SavedPlayer(level.saveId, position, view.saveId)
+    override fun save() = SavedPlayer(level.saveId, position, view.id)
 }

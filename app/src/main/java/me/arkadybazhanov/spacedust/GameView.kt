@@ -11,12 +11,7 @@ import me.arkadybazhanov.spacedust.core.*
 class GameView(context: Context, attributes: AttributeSet) :
     SurfaceView(context, attributes),
     SurfaceHolder.Callback,
-    CoroutineScope,
-    Savable {
-
-    override val saveId: Int get() = -2
-
-    override fun save(): Nothing = error("Should be restored explicitly")
+    CoroutineScope {
 
     private val drawer: LevelDrawer by lazy { LevelDrawer(resources) }
 
