@@ -1,6 +1,5 @@
 package me.arkadybazhanov.spacedust
 
-import android.support.annotation.IdRes
 import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
@@ -9,7 +8,10 @@ import java.lang.Math.*
 class Player(
     override var level: Level,
     position: Position,
-    val view: GameView
+    private val view: GameView,
+    val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
+        Array(lvl.h) { BooleanArray(lvl.w) }
+    }
 ) : Character {
     override val refs get() = listOf(level)
 
@@ -30,10 +32,6 @@ class Player(
 
     override fun isVisible(position: Position): Boolean {
         return max(abs(position.x - this.position.x), abs(position.y - this.position.y)) <= VISIBILITY_RANGE
-    }
-
-    val discoveredCells = Cache<Level, Array<BooleanArray>> { level ->
-        Array(level.h) { BooleanArray(level.w) }
     }
 
     private val queuedMoves: Queue<Position> = ArrayDeque()
@@ -91,11 +89,21 @@ class Player(
     override fun toString() = "Player(id=$saveId)"
 
     @Serializable
-    data class SavedPlayer(val level: Int, val position: Position, @IdRes val view: Int) : SavedStrong<Player> {
+    class SavedPlayer(
+        val level: Int,
+        val position: Position,
+        val discoveredCells: Array<Pair<Int, Array<Array<Boolean>>>>
+    ) : SavedStrong<Player> {
         override val saveId: Int get() = PLAYER_SAVE_ID
         override val refs = listOf(level)
-        override fun initial(pool: Pool): Player = Player(pool.load(level), position, (pool as CachePool).view)
+        override fun initial(pool: Pool): Player = Player(pool.load(level), position, (pool as CachePool).view).apply {
+            discoveredCells.putAll(this@SavedPlayer.discoveredCells.associate {
+                pool.load<Level>(it.first) to it.second.map(Array<Boolean>::toBooleanArray).toTypedArray()
+            })
+        }
     }
 
-    override fun save() = SavedPlayer(level.saveId, position, view.id)
+    override fun save() = SavedPlayer(level.saveId, position, discoveredCells.map { (level, cells) ->
+        level.saveId to cells.map(BooleanArray::toTypedArray).toTypedArray()
+    }.toTypedArray())
 }

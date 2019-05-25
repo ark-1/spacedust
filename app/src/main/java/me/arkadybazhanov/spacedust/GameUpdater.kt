@@ -13,7 +13,7 @@ class GameUpdater(private val view: GameView, player: Player? = null) {
     private val game = player?.game ?: Game()
 
     val player = player?.apply(Player::updateDiscovered)
-        ?: LevelGeneration.generateSmallRoomAndCreate(game) { level, position ->
+        ?: LevelGeneration.generateLevelAndCreate(game) { level, position ->
         Player(level, position, view).apply(Player::updateDiscovered)
     }.second
 
