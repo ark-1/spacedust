@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import android.view.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import me.arkadybazhanov.spacedust.core.Position
+import me.arkadybazhanov.spacedust.core.*
 
 class GameView(context: Context, attributes: AttributeSet) :
     SurfaceView(context, attributes),

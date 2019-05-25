@@ -5,19 +5,18 @@ import android.os.Bundle
 import android.support.v4.view.GestureDetectorCompat
 import android.view.*
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import me.arkadybazhanov.spacedust.core.Game
 
 class MainActivity : Activity(), CoroutineScope {
 
     private lateinit var job: Job
+    private lateinit var gameUpdater: GameUpdater
     override val coroutineContext
         get() = Dispatchers.Default + job
 
     private val gestureDetector by lazy { GestureDetectorCompat(this, gestureListener) }
     private val scaleGestureDetector by lazy { ScaleGestureDetector(this, gestureListener) }
-
-    private val view get() = findViewById<GameView>(R.id.game_view)!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +25,46 @@ class MainActivity : Activity(), CoroutineScope {
 
         setContentView(R.layout.activity_main)
 
+        savedInstanceState?.let { state = it }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val savedInstanceState = state
+
+        val player = savedInstanceState?.let {
+            val kClasses = savedInstanceState.getStringArray(SerializedState::kClasses.name) ?: return@let null
+            val values = savedInstanceState.getStringArray(SerializedState::values.name) ?: return@let null
+            SerializedState(kClasses = kClasses, values = values)
+        }?.let { it.restorePlayer(gameView) }
+
         job = Job()
-        Game.reset()
         launch {
-            GameUpdater(view).run()
+            gameUpdater = GameUpdater(gameView, player)
+            gameUpdater.run()
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+
+        runBlocking { job.cancelAndJoin() }
+
+        val serializedState = serialize(gameUpdater.player)
+
+        state = Bundle().apply {
+            putStringArray(SerializedState::kClasses.name, serializedState.kClasses)
+            putStringArray(SerializedState::values.name, serializedState.values)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putAll(state)
+    }
+
+    private var state: Bundle? = null
 
     override fun onDestroy() {
         super.onDestroy()
@@ -51,20 +84,20 @@ class MainActivity : Activity(), CoroutineScope {
         override fun onDown(e: MotionEvent?): Boolean = true
 
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            view.tap(e.x, e.y)
+            gameView.tap(e.x, e.y)
             return true
         }
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            view.camera.scaleFactor *= detector.scaleFactor
-            view.camera.shiftX -= (detector.scaleFactor - 1) / view.camera.scaleFactor * detector.focusX
-            view.camera.shiftY -= (detector.scaleFactor - 1) / view.camera.scaleFactor * detector.focusY
+            gameView.camera.scaleFactor *= detector.scaleFactor
+            gameView.camera.shiftX -= (detector.scaleFactor - 1) / gameView.camera.scaleFactor * detector.focusX
+            gameView.camera.shiftY -= (detector.scaleFactor - 1) / gameView.camera.scaleFactor * detector.focusY
             return true
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            view.camera.shiftX -= distanceX / view.camera.scaleFactor
-            view.camera.shiftY -= distanceY / view.camera.scaleFactor
+            gameView.camera.shiftX -= distanceX / gameView.camera.scaleFactor
+            gameView.camera.shiftY -= distanceY / gameView.camera.scaleFactor
             return true
         }
     }

@@ -4,24 +4,23 @@ import android.util.Log
 import kotlinx.coroutines.yield
 import me.arkadybazhanov.spacedust.core.*
 
-class GameUpdater(private val view: GameView) {
+class GameUpdater(private val view: GameView, player: Player? = null) {
 
     init {
-        Log.d(this::class.simpleName, "${Game::class.simpleName}.${Game::seed.name} is ${Game.seed}")
+        Log.d(this::class.simpleName, "${Game::class.simpleName}.${Game.Companion::seed.name} is ${Game.seed}")
     }
 
-    private val player = LevelGeneration.generateLevelAndCreate { level, position ->
-        Player(level, position, view).also {
-            for ((pos, _) in level.withPosition().filter { (p, _) -> it.isVisible(p) }) {
-                it.discoveredCells.getValue(level)[pos.x][pos.y] = true
-            }
-        }
+    private val game = player?.game ?: Game()
+
+    val player = player?.apply(Player::updateDiscovered)
+        ?: LevelGeneration.generateSmallRoomAndCreate(game) { level, position ->
+        Player(level, position, view).apply(Player::updateDiscovered)
     }.second
 
     suspend fun run() {
         do {
             view.snapshot = player.level.snapshot(player)
             yield()
-        } while (Game.update())
+        } while (game.update())
     }
 }

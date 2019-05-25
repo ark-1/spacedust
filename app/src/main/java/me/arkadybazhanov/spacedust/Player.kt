@@ -1,10 +1,20 @@
 package me.arkadybazhanov.spacedust
 
+import android.support.annotation.IdRes
+import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
 import java.lang.Math.*
 
-class Player(override var level: Level, position: Position, private val view: GameView) : Character {
+class Player(
+    override var level: Level,
+    position: Position,
+    val view: GameView
+) : Character {
+    override val refs get() = listOf(level)
+
+    override val saveId: Int get() = PLAYER_SAVE_ID
+
     override var position = position
         set(value) {
             field = value
@@ -22,29 +32,26 @@ class Player(override var level: Level, position: Position, private val view: Ga
         return max(abs(position.x - this.position.x), abs(position.y - this.position.y)) <= VISIBILITY_RANGE
     }
 
-    override val id: Int get() = -1
-
-    private fun putLevel(level: Level, it: Array<BooleanArray>) {
-        discoveredCells[level] = it
-    }
-
-    val discoveredCells: MutableMap<Level, Array<BooleanArray>> = mutableMapOf<Level, Array<BooleanArray>>().withDefault { level ->
-        Array(level.h) { BooleanArray(level.w) }.also { putLevel(level, it) }
+    val discoveredCells = Cache<Level, Array<BooleanArray>> { level ->
+        Array(level.h) { BooleanArray(level.w) }
     }
 
     private val queuedMoves: Queue<Position> = ArrayDeque()
 
-    private fun updateDiscovered() {
+    fun updateDiscovered() {
         for ((position, _) in level.withPosition().filter { (p, _) -> isVisible(p) }) {
-            discoveredCells.getValue(level)[position.x][position.y] = true
+            discoveredCells[level][position.x][position.y] = true
         }
     }
 
-    override suspend fun getNextEvent(): PerformableEvent {
+    override suspend fun getNextEvent(): Action {
         if (!queuedMoves.isEmpty()) {
             val position = queuedMoves.remove()
             var danger = false
             for (to in nearList(position) + position) {
+                if (!to.isValid(level.w, level.h)) {
+                    continue
+                }
                 if (!level[to].isEmpty() && to != this.position) {
                     danger = true
                 }
@@ -53,7 +60,7 @@ class Player(override var level: Level, position: Position, private val view: Ga
                 queuedMoves.clear()
             } else {
                 view.camera.move(position - this.position)
-                return Move(this, position, Game.time, 20)
+                return Move(this, position, game.time, 20)
             }
         }
 
@@ -65,11 +72,11 @@ class Player(override var level: Level, position: Position, private val view: Ga
         } while (path == null || !canMoveTo(position) || (!level[position].isEmpty() && !isNear(position)))
 
         return if (!level[position].isEmpty()) {
-            Attack(this, level[position].character!!, Game.time, 10)
+            Attack(this, level[position].character!!, game.time, 10)
         } else {
             if (path.size == 1) {
                 view.camera.move(path[0] - this.position)
-                return Move(this, path[0], Game.time, 20)
+                return Move(this, path[0], game.time, 20)
             }
             queuedMoves += path
             getNextEvent()
@@ -78,5 +85,17 @@ class Player(override var level: Level, position: Position, private val view: Ga
 
     companion object {
         const val VISIBILITY_RANGE = 3
+        const val PLAYER_SAVE_ID = -1
     }
+
+    override fun toString() = "Player(id=$saveId)"
+
+    @Serializable
+    data class SavedPlayer(val level: Int, val position: Position, @IdRes val view: Int) : SavedStrong<Player> {
+        override val saveId: Int get() = PLAYER_SAVE_ID
+        override val refs = listOf(level)
+        override fun initial(pool: Pool): Player = Player(pool.load(level), position, (pool as CachePool).view)
+    }
+
+    override fun save() = SavedPlayer(level.saveId, position, view.id)
 }

@@ -29,16 +29,19 @@ interface Character : EventGenerator {
     }
 }
 
+val Character.game get() = level.game
+
 fun Character.create(delay: Int = 0) {
-    level[position].character = this
-    Game.characters += Game.time + delay to this
+    cell.character = this
+    game.characters += game.time + delay to this
 }
 
 fun Character.die() {
-    level[position].character = null
-    Game.characters -= Game.characters.first { (_, character) -> character == this }
+    cell.character = null
+    game.characters -= game.characters.first { (_, character) -> character.saveId == saveId }
 }
 
 fun Character.isNear(where: Position): Boolean = directions.any { where == position + it }
 fun Character.near(position: Position): Iterator<Position> = directions.asSequence().map { position + it }.iterator()
 fun Character.nearList(position: Position) = directions.map { position + it }
+val Character.cell: Cell get() = level[position]
