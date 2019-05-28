@@ -56,6 +56,11 @@ class BasicMonster(
         inventory.map(Item::saveId)
     )
 
+    override fun die() {
+        super.die()
+        cell.items += Weapon(5)
+    }
+
     @Serializable
     data class SavedBasicMonster(
         override val saveId: Int,

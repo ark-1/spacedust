@@ -1,5 +1,6 @@
 package me.arkadybazhanov.spacedust
 
+import android.util.Log
 import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
@@ -13,6 +14,9 @@ class Player(
     override var strength: Int,
     val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
         Array(lvl.h) { BooleanArray(lvl.w) }
+    },
+    val visibleCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
+        Array(lvl.h) { BooleanArray(lvl.w) }
     }
 ) : Character {
     override val refs get() = inventory + (level as Savable)
@@ -23,7 +27,7 @@ class Player(
     override var position = position
         set(value) {
             field = value
-            updateDiscovered()
+            updateVisibility()
         }
 
     override val directions = Character.kingDirections
@@ -34,12 +38,15 @@ class Player(
     }
 
     override fun isVisible(position: Position): Boolean {
-        return max(abs(position.x - this.position.x), abs(position.y - this.position.y)) <= VISIBILITY_RANGE
+        return visibleCells[level][position.x][position.y]
     }
 
     private val queuedMoves: Queue<Position> = ArrayDeque()
 
-    fun updateDiscovered() {
+    fun updateVisibility() {
+        val calculator = VisibilityCalculator(this, VISIBILITY_RANGE)
+        visibleCells[level] = calculator.calculateVisibility()
+
         for ((position, _) in level.withPosition().filter { (p, _) -> isVisible(p) }) {
             discoveredCells[level][position.x][position.y] = true
         }
@@ -61,7 +68,7 @@ class Player(
                 queuedMoves.clear()
             } else {
                 view.camera.move(position - this.position)
-                return Move(this, position, game.time, 20)
+                return Move(this, position, game.time, MOVE_SPEED)
             }
         }
 
@@ -73,11 +80,11 @@ class Player(
         } while (path == null || !canMoveTo(position) || (!level[position].isEmpty() && !isNear(position)))
 
         return if (!level[position].isEmpty()) {
-            Attack(this, level[position].character!!, game.time, 10)
+            Attack(this, level[position].character!!, game.time, ATTACK_SPEED)
         } else {
             if (path.size == 1) {
                 view.camera.move(path[0] - this.position)
-                return Move(this, path[0], game.time, 20)
+                return Move(this, path[0], game.time, MOVE_SPEED)
             }
             queuedMoves += path
             getNextEvent()
@@ -85,10 +92,12 @@ class Player(
     }
 
     companion object {
-        const val VISIBILITY_RANGE = 3
+        const val VISIBILITY_RANGE = 9
         const val PLAYER_SAVE_ID = -1
         const val STARTING_HP = 100
         const val STARTING_STRENGTH = 20
+        const val ATTACK_SPEED = 10
+        const val MOVE_SPEED = 20
     }
 
     override fun toString() = "Player(id=$saveId)"

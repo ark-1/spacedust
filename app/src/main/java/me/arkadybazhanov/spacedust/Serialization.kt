@@ -11,6 +11,7 @@ import me.arkadybazhanov.spacedust.core.Level.SavedLevel
 import me.arkadybazhanov.spacedust.core.LevelGeneration.DefaultMonsterSpawner.SavedDefaultMonsterSpawner
 import me.arkadybazhanov.spacedust.core.Move.MoveEvent.SavedMoveEvent
 import me.arkadybazhanov.spacedust.core.Spawn.SpawnEvent.SavedSpawnEvent
+import me.arkadybazhanov.spacedust.core.Weapon.*
 import kotlin.reflect.KClass
 
 class SerializedState(val kClasses: Array<String>, val values: Array<String>)
@@ -63,6 +64,7 @@ private val savedClasses = mutableMapOf<String, KClass<out Saved<*>>>().apply {
     add<SavedGame>()
     add<SavedLevel>()
     add<SavedDefaultMonsterSpawner>()
+    add<SavedWeapon>()
 }
 
 private fun forName(className: String): KClass<*> = try {

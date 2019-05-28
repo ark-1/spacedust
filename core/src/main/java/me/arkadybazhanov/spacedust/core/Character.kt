@@ -4,12 +4,17 @@ interface Character : EventGenerator {
     var level: Level
     var position: Position
     val directions: List<Direction>
-    val inventory: List<Item>
+    val inventory: MutableList<Item>
     var hp: Int
     var strength: Int
 
     fun canMoveTo(position: Position): Boolean
     fun isVisible(position: Position) : Boolean
+
+    fun die() {
+        cell.character = null
+        game.characters -= game.characters.first { (_, character) -> character.saveId == saveId }
+    }
 
     companion object {
         val wazirDirections = listOf(
@@ -29,6 +34,13 @@ interface Character : EventGenerator {
             Direction(1, 1),
             Direction(1, -1)
         )
+
+        val bishopDirections = listOf(
+            Direction(-1, -1),
+            Direction(-1, 1),
+            Direction(1, 1),
+            Direction(1, -1)
+        )
     }
 }
 
@@ -37,11 +49,6 @@ val Character.game get() = level.game
 fun Character.create(delay: Int = 0) {
     cell.character = this
     game.characters += game.time + delay to this
-}
-
-fun Character.die() {
-    cell.character = null
-    game.characters -= game.characters.first { (_, character) -> character.saveId == saveId }
 }
 
 fun Character.isNear(where: Position): Boolean = directions.any { where == position + it }

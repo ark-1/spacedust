@@ -4,13 +4,13 @@ import me.arkadybazhanov.spacedust.core.*
 import kotlin.reflect.KClass
 
 class LevelSnapshot private constructor(
-    private val cells: Array<Array<CellSnapshot>>,
-    val playerPosition: Position
-) {
+    private val cells: Array<Array<CellSnapshot>>) {
     data class CellSnapshot(
         val type: CellType,
         val characterType: KClass<out Character>?,
-        val discovered: Boolean
+        val discovered: Boolean,
+        val visible: Boolean,
+        val itemType: KClass<out Item>?
     )
 
     val w = cells.size
@@ -20,10 +20,15 @@ class LevelSnapshot private constructor(
         Array(level.w) { x ->
             Array(level.h) { y ->
                 val cell = level[x, y]
-                CellSnapshot(cell.type, cell.character?.let { it::class }, player.discoveredCells.getValue(level)[x][y])
+                CellSnapshot(
+                    cell.type,
+                    cell.character?.let { it::class },
+                    player.discoveredCells.getValue(level)[x][y],
+                    player.visibleCells.getValue(level)[x][y],
+                    cell.items.lastOrNull()?.let { it::class }
+                )
             }
-        }, player.position
-    )
+        })
 
     fun withCoordinates() = iterator {
         for ((x, col) in cells.withIndex()) {

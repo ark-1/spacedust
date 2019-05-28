@@ -62,6 +62,10 @@ class Move(
         character.cell.character = null
         character.position = to
         character.cell.character = character
+        if (character.cell.items.isNotEmpty()) {
+            character.inventory += character.cell.items
+            character.cell.items.clear()
+        }
 
         return MoveEvent(character, time, duration)
     }

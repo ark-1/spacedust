@@ -6,7 +6,6 @@ import me.arkadybazhanov.spacedust.LevelSnapshot.CellSnapshot
 import me.arkadybazhanov.spacedust.R.drawable.*
 import me.arkadybazhanov.spacedust.core.CellType.*
 import me.arkadybazhanov.spacedust.core.Position
-import kotlin.math.*
 
 class LevelDrawer(private val resources: Resources) {
     private fun square(left: Float, top: Float, width: Float) = RectF(
@@ -27,7 +26,7 @@ class LevelDrawer(private val resources: Resources) {
                 val src = Rect(0, 0, bm.width, bm.height)
                 val dst = square(x.cell, y.cell, 1.cell)
                 canvas.drawBitmap(bm, src, dst, null)
-                if (max(abs(x - level.playerPosition.x), abs(y - level.playerPosition.y)) <= Player.VISIBILITY_RANGE) {
+                if (cell.visible) {
                     bm2?.let { canvas.drawBitmap(it, src, dst, null) }
                 } else {
                     canvas.drawRect(dst, Paint().apply { color = Color.argb(100, 0, 0, 0) })
@@ -67,7 +66,11 @@ class LevelDrawer(private val resources: Resources) {
             Player::class -> player
             else -> monster
         }
-        return bitmaps[cellId] to id?.let { bitmaps[it] }
+        val itemId = when (itemType) {
+            null -> null
+            else -> player
+        }
+        return bitmaps[cellId] to (id?.let { bitmaps[it] } ?: (itemId?.let { bitmaps[it] } ))
     }
 
     fun getCell(level: LevelSnapshot, camera: Camera, x: Float, y: Float): Position? {
