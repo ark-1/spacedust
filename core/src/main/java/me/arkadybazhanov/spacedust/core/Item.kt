@@ -1,7 +1,12 @@
 package me.arkadybazhanov.spacedust.core
 
-interface Item
+interface Item : Savable {
+}
+/*
+class Weapon(val attack : Int,
+             override val saveId: Int = Game.getNextId()
+): Item {
 
-class Weapon(val attack : Int): Item
+}
 
-class Armor(val armorClass: Int): Item
+class Armor(val armorClass: Int): Item*/

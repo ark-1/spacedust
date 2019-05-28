@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 class Cell(var type: CellType) {
     val events = mutableListOf<Event>()
     var character: Character? = null
+    val items = mutableListOf<Item>()
 
     fun isEmpty() = character == null
 }
@@ -18,7 +19,7 @@ class Level(
     private val cells: Array2D<Cell>,
     override val saveId: Int = Game.getNextId()
 ) : Iterable<Cell>, Savable {
-    override val refs get() = cells.flatMap { it.flatMap(Cell::events) } + game
+    override val refs get() = cells.flatMap { it.flatMap(Cell::events) + it.flatMap(Cell::items) } + game
 
     init {
         require(cells.isNotEmpty())
@@ -30,6 +31,7 @@ class Level(
     override fun iterator(): Iterator<Cell> = iterator {
         for (col in cells) for (cell in col) yield(cell)
     }
+
     fun withPosition(): Iterable<Pair<Position, Cell>> = iterator {
         for ((x, col) in cells.withIndex()) {
             for ((y, cell) in col.withIndex()) {
@@ -43,7 +45,12 @@ class Level(
     operator fun get(x: Int, y: Int): Cell = cells[x][y]
 
     @Serializable
-    data class SavedCell(val type: CellType, val events: List<Int>, val character: Int?)
+    data class SavedCell(
+        val type: CellType,
+        val events: List<Int>,
+        val character: Int?,
+        val items: List<Int>
+    )
 
     @Serializable
     class SavedLevel(
@@ -51,7 +58,7 @@ class Level(
         val game: Int,
         val cells: Array2D<SavedCell>
     ) : SavedStrong<Level> {
-        override val refs = cells.flatMap { it.flatMap(SavedCell::events) }
+        override val refs = cells.flatMap { it.flatMap(SavedCell::events) + it.flatMap(SavedCell::items) }
 
         override fun initial(pool: Pool) = Level(pool.load(game), cells.map {
             Cell(it.type)
@@ -64,13 +71,19 @@ class Level(
                     cell.character = pool.load(savedCell.character)
                 }
                 cell.events += savedCell.events.loadEach(pool)
+                cell.items += savedCell.items.map { id -> pool.load<Item>(id) }
             }
         }
 
     }
 
     override fun save() = SavedLevel(saveId, game.saveId, cells.map {
-        SavedCell(it.type, it.events.map(Event::saveId), it.character?.saveId)
+        SavedCell(
+            it.type,
+            it.events.map(Event::saveId),
+            it.character?.saveId,
+            it.items.map(Item::saveId)
+        )
     })
 }
 

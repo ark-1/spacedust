@@ -9,16 +9,14 @@ class Player(
     override var level: Level,
     position: Position,
     private val view: GameView,
-    override var maxHp: Int,
+    override var hp: Int,
     override var strength: Int,
     val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
         Array(lvl.h) { BooleanArray(lvl.w) }
     }
 ) : Character {
-    override val refs get() = listOf(level)
-    override val inventory: List<Item> = mutableListOf()
-
-    override var hp: Int = maxHp
+    override val refs get() = inventory + (level as Savable)
+    override val inventory = mutableListOf<Item>()
 
     override val saveId: Int get() = PLAYER_SAVE_ID
 
@@ -99,19 +97,25 @@ class Player(
     class SavedPlayer(
         val level: Int,
         val position: Position,
+        val hp: Int,
+        val strength: Int,
+        val inventory: List<Int>,
         val discoveredCells: Array<Pair<Int, Array<Array<Boolean>>>>
     ) : SavedStrong<Player> {
         override val saveId: Int get() = PLAYER_SAVE_ID
-        override val refs = listOf(level)
+        override val refs = inventory + level
         override fun initial(pool: Pool): Player = Player(pool.load(level), position,
-            (pool as CachePool).view, STARTING_HP, STARTING_STRENGTH).apply {
+            (pool as CachePool).view, hp, strength).apply {
             discoveredCells.putAll(this@SavedPlayer.discoveredCells.associate {
                 pool.load<Level>(it.first) to it.second.map(Array<Boolean>::toBooleanArray).toTypedArray()
             })
+            inventory += this@SavedPlayer.inventory.map { id -> pool.load<Item>(id) }
         }
     }
 
-    override fun save() = SavedPlayer(level.saveId, position, discoveredCells.map { (level, cells) ->
-        level.saveId to cells.map(BooleanArray::toTypedArray).toTypedArray()
-    }.toTypedArray())
+    override fun save() = SavedPlayer(level.saveId, position, hp, strength,
+        inventory.map(Item::saveId),
+        discoveredCells.map { (level, cells) ->
+            level.saveId to cells.map(BooleanArray::toTypedArray).toTypedArray()
+        }.toTypedArray())
 }

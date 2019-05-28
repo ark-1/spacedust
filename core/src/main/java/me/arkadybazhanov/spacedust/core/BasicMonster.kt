@@ -6,13 +6,12 @@ class BasicMonster(
     override var level: Level,
     override var position: Position,
     var speed: Int,
-    override var maxHp: Int,
+    override var hp: Int,
     override var strength: Int,
     override val saveId: Int = Game.getNextId()
 ) : Character {
-    override val refs: Iterable<Savable> get() = listOf(level)
-    override val inventory: List<Item> = mutableListOf()
-    override var hp = maxHp
+    override val refs get() = inventory + (level as Savable)
+    override val inventory = mutableListOf<Item>()
 
     override fun canMoveTo(position: Position): Boolean {
         return position.x in (0 until level.w)
@@ -47,7 +46,15 @@ class BasicMonster(
 
     override fun toString() = "BasicMonster(id=$saveId)"
 
-    override fun save() = SavedBasicMonster(saveId, level.saveId, position, speed, maxHp, strength)
+    override fun save() = SavedBasicMonster(
+        saveId,
+        level.saveId,
+        position,
+        speed,
+        hp,
+        strength,
+        inventory.map(Item::saveId)
+    )
 
     @Serializable
     data class SavedBasicMonster(
@@ -56,11 +63,14 @@ class BasicMonster(
         val position: Position,
         val speed: Int,
         val maxHp: Int,
-        val strength: Int
+        val strength: Int,
+        val inventory: List<Int>
     ) : SavedStrong<BasicMonster> {
         override val refs = listOf(level)
 
         override fun initial(pool: Pool): BasicMonster =
-            BasicMonster(pool.load(level), position, speed, maxHp, strength, saveId)
+            BasicMonster(pool.load(level), position, speed, maxHp, strength, saveId).apply {
+                inventory += this@SavedBasicMonster.inventory.map {id -> pool.load<Item>(id)}
+            }
     }
 }

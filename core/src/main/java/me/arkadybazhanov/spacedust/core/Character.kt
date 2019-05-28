@@ -5,7 +5,6 @@ interface Character : EventGenerator {
     var position: Position
     val directions: List<Direction>
     val inventory: List<Item>
-    var maxHp: Int
     var hp: Int
     var strength: Int
 
