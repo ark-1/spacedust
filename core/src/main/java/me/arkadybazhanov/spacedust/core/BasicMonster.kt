@@ -6,11 +6,13 @@ class BasicMonster(
     override var level: Level,
     override var position: Position,
     var speed: Int,
-    var maxHp: Int,
-    var strength: Int,
+    override var maxHp: Int,
+    override var strength: Int,
     override val saveId: Int = Game.getNextId()
 ) : Character {
     override val refs: Iterable<Savable> get() = listOf(level)
+    override val inventory: List<Item> = mutableListOf()
+    override var hp = maxHp
 
     override fun canMoveTo(position: Position): Boolean {
         return position.x in (0 until level.w)

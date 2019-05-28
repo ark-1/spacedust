@@ -9,11 +9,16 @@ class Player(
     override var level: Level,
     position: Position,
     private val view: GameView,
+    override var maxHp: Int,
+    override var strength: Int,
     val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
         Array(lvl.h) { BooleanArray(lvl.w) }
     }
 ) : Character {
     override val refs get() = listOf(level)
+    override val inventory: List<Item> = mutableListOf()
+
+    override var hp: Int = maxHp
 
     override val saveId: Int get() = PLAYER_SAVE_ID
 
@@ -84,6 +89,8 @@ class Player(
     companion object {
         const val VISIBILITY_RANGE = 3
         const val PLAYER_SAVE_ID = -1
+        const val STARTING_HP = 100
+        const val STARTING_STRENGTH = 20
     }
 
     override fun toString() = "Player(id=$saveId)"
@@ -96,7 +103,8 @@ class Player(
     ) : SavedStrong<Player> {
         override val saveId: Int get() = PLAYER_SAVE_ID
         override val refs = listOf(level)
-        override fun initial(pool: Pool): Player = Player(pool.load(level), position, (pool as CachePool).view).apply {
+        override fun initial(pool: Pool): Player = Player(pool.load(level), position,
+            (pool as CachePool).view, STARTING_HP, STARTING_STRENGTH).apply {
             discoveredCells.putAll(this@SavedPlayer.discoveredCells.associate {
                 pool.load<Level>(it.first) to it.second.map(Array<Boolean>::toBooleanArray).toTypedArray()
             })

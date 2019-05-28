@@ -115,7 +115,10 @@ class Attack(
     }
 
     override fun perform(): AttackEvent {
-        defender.die()
+        defender.hp -= attacker.strength
+        if (defender.hp <= 0) {
+            defender.die()
+        }
         return AttackEvent(attacker, defender, time, duration)
     }
 }

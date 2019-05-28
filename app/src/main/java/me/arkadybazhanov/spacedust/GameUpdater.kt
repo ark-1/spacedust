@@ -14,7 +14,7 @@ class GameUpdater(private val view: GameView, player: Player? = null) {
 
     val player = player?.apply(Player::updateDiscovered)
         ?: LevelGeneration.generateLevelAndCreate(game) { level, position ->
-        Player(level, position, view).apply(Player::updateDiscovered)
+        Player(level, position, view, Player.STARTING_HP, Player.STARTING_STRENGTH).apply(Player::updateDiscovered)
     }.second
 
     suspend fun run() {
