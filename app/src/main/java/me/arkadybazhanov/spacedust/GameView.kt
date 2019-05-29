@@ -6,9 +6,12 @@ import android.graphics.Canvas
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.*
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import me.arkadybazhanov.spacedust.core.Position
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class GameView(context: Context, attributes: AttributeSet) :
     SurfaceView(context, attributes),
@@ -34,7 +37,11 @@ class GameView(context: Context, attributes: AttributeSet) :
         }
     }
 
-    val camera by lazy { Camera(width) }
+    val camera by lazy {
+        Camera(width, height).also {
+            println(width)
+        }
+    }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
 

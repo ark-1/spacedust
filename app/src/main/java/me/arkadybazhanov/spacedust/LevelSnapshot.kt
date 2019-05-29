@@ -4,7 +4,10 @@ import me.arkadybazhanov.spacedust.core.*
 import kotlin.reflect.KClass
 
 class LevelSnapshot private constructor(
-    private val cells: Array<Array<CellSnapshot>>) {
+    private val cells: Array<Array<CellSnapshot>>,
+    val playerSnapshot: PlayerSnapshot
+) {
+
     data class CellSnapshot(
         val type: CellType,
         val characterType: KClass<out Character>?,
@@ -15,6 +18,11 @@ class LevelSnapshot private constructor(
 
     val w = cells.size
     val h = cells[0].size
+
+    data class PlayerSnapshot(
+        val hp: Int,
+        val maxHp: Int
+    )
 
     constructor(level: Level, player: Player) : this(
         Array(level.w) { x ->
@@ -28,7 +36,7 @@ class LevelSnapshot private constructor(
                     cell.items.lastOrNull()?.let { it::class }
                 )
             }
-        })
+        }, PlayerSnapshot(player.hp, Player.STARTING_HP))
 
     fun withCoordinates() = iterator {
         for ((x, col) in cells.withIndex()) {

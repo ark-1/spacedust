@@ -7,11 +7,11 @@ import kotlinx.coroutines.*
 import me.arkadybazhanov.spacedust.core.Direction
 import java.util.concurrent.ConcurrentHashMap
 
-class Camera(width: Int) {
+class Camera(width: Int, height: Int) {
     var scaleFactor = 1.7189566f
 
-    val shiftX = AtomicFloat(Player.VISIBILITY_RANGE.cell)
-    val shiftY = AtomicFloat(Player.VISIBILITY_RANGE.cell)
+    val shiftX = AtomicFloat(width / 4f)
+    val shiftY = AtomicFloat(height / 4f)
 
     private var updId = 0
 

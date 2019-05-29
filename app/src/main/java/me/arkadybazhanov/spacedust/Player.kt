@@ -66,6 +66,9 @@ class Player(
                 queuedMoves.clear()
             } else {
                 view.camera.move(position - this.position)
+                if (level[position].type in listOf(CellType.DOWNSTAIRS, CellType.UPSTAIRS)) {
+                    queuedMoves.clear()
+                }
                 return Move(this, position, game.time, MOVE_SPEED)
             }
         }

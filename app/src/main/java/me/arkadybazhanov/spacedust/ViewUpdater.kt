@@ -4,6 +4,8 @@ import android.graphics.*
 import android.util.Log
 import android.view.SurfaceHolder
 import kotlinx.coroutines.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object ViewUpdater {
 
@@ -21,17 +23,14 @@ object ViewUpdater {
     }
 
     var healthSurfaceHolder: SurfaceHolder? = null
+    var healthView: HealthView? = null
 
     suspend fun run(surfaceHolder: SurfaceHolder, gameView: GameView) {
         while (true) {
             val startTime = System.nanoTime()
 
             surfaceHolder.withCanvas(gameView::draw)
-            healthSurfaceHolder?.withCanvas {
-                it.drawRect(0F, 0F, it.width * 0.8F, it.height.toFloat(), Paint().apply {
-                    color = Color.RED
-                })
-            }
+            healthSurfaceHolder?.withCanvas(healthView!!::draw)
 
             val timeMillis = (System.nanoTime() - startTime) / 1_000_000
             val waitTime = targetTimeMillis - timeMillis
@@ -40,6 +39,7 @@ object ViewUpdater {
             yield()
         }
     }
+
 
     private const val targetFps = 50
     private const val targetTimeMillis = 1000L / targetFps
