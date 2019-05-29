@@ -1,9 +1,10 @@
 package me.arkadybazhanov.spacedust
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.view.GestureDetectorCompat
-import android.view.*
+import android.support.v7.widget.LinearLayoutManager
+import android.view.View.*
 import android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
@@ -15,15 +16,23 @@ class MainActivity : Activity(), CoroutineScope {
     override val coroutineContext
         get() = Dispatchers.Default + job
 
-    private val gestureDetector by lazy { GestureDetectorCompat(this, gestureListener) }
-    private val scaleGestureDetector by lazy { ScaleGestureDetector(this, gestureListener) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
 
         setContentView(R.layout.activity_main)
+
+        recyclerView.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = gameView.inventory
+            setBackgroundColor(Color.WHITE)
+        }
+
+        button.setOnClickListener {
+            recyclerView.visibility = if (recyclerView.visibility == GONE) VISIBLE else GONE
+        }
 
         savedInstanceState?.let { state = it }
     }
@@ -69,36 +78,5 @@ class MainActivity : Activity(), CoroutineScope {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return (scaleGestureDetector.onTouchEvent(event) or
-            gestureDetector.onTouchEvent(event)) ||
-            super.onTouchEvent(event)
-    }
-
-    private val gestureListener = object :
-        GestureDetector.OnGestureListener by GestureDetector.SimpleOnGestureListener(),
-        ScaleGestureDetector.OnScaleGestureListener by ScaleGestureDetector.SimpleOnScaleGestureListener() {
-
-        override fun onDown(e: MotionEvent?): Boolean = true
-
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            gameView.tap(e.x, e.y)
-            return true
-        }
-
-        override fun onScale(detector: ScaleGestureDetector): Boolean {
-            gameView.camera.scaleFactor *= detector.scaleFactor
-            gameView.camera.shiftX -= (detector.scaleFactor - 1) / gameView.camera.scaleFactor * detector.focusX
-            gameView.camera.shiftY -= (detector.scaleFactor - 1) / gameView.camera.scaleFactor * detector.focusY
-            return true
-        }
-
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            gameView.camera.shiftX -= distanceX / gameView.camera.scaleFactor
-            gameView.camera.shiftY -= distanceY / gameView.camera.scaleFactor
-            return true
-        }
     }
 }

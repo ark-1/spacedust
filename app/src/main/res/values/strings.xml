@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SpaceDust</string>
+    <string name="inventory">Inventory</string>
 </resources>

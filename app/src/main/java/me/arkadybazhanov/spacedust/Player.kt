@@ -20,7 +20,7 @@ class Player(
     }
 ) : Character {
     override val refs get() = inventory + (level as Savable)
-    override val inventory = mutableListOf<Item>()
+    override val inventory = view.inventory.items.apply { clear() }
 
     override val saveId: Int get() = PLAYER_SAVE_ID
 

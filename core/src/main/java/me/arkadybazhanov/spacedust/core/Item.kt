@@ -3,12 +3,12 @@ package me.arkadybazhanov.spacedust.core
 import kotlinx.serialization.Serializable
 
 interface Item : Savable {
+    val name: String
 }
 
-class Weapon(val damage: Int,
-             override val saveId: Int = Game.getNextId()
-) : Item {
+class Weapon(val damage: Int, override val saveId: Int = Game.getNextId()) : Item {
     override fun save() = SavedWeapon(saveId, damage)
+    override val name = "waepon"
 
     override val refs = listOf<Savable>()
 
