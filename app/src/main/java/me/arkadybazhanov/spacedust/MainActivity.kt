@@ -19,34 +19,30 @@ class MainActivity : Activity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        state = loadFromFiles()?.let { saveToBundle(it) }
+
         window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
 
         setContentView(R.layout.activity_main)
 
-        recyclerView.apply {
+        inventoryView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = gameView.inventory
             setBackgroundColor(Color.WHITE)
         }
 
-        button.setOnClickListener {
-            recyclerView.visibility = if (recyclerView.visibility == GONE) VISIBLE else GONE
+        inventoryButton.setOnClickListener {
+            inventoryView.visibility = if (inventoryView.visibility == GONE) VISIBLE else GONE
         }
 
-        savedInstanceState?.let { state = it }
+        savedInstanceState?.let { state = it } ?: loadFromFiles()?.let { state = saveToBundle(it) }
     }
 
     override fun onResume() {
         super.onResume()
 
-        val savedInstanceState = state
-
-        val player = savedInstanceState?.let {
-            val kClasses = savedInstanceState.getStringArray(SerializedState::kClasses.name) ?: return@let null
-            val values = savedInstanceState.getStringArray(SerializedState::values.name) ?: return@let null
-            SerializedState(kClasses = kClasses, values = values)
-        }?.let { it.restorePlayer(gameView) }
+        val player = state?.let { loadFromBundle(it) }?.restorePlayer(gameView)
 
         job = Job()
         launch {
@@ -60,23 +56,19 @@ class MainActivity : Activity(), CoroutineScope {
 
         runBlocking { job.cancelAndJoin() }
 
-        val serializedState = serialize(gameUpdater.player)
-
-        state = Bundle().apply {
-            putStringArray(SerializedState::kClasses.name, serializedState.kClasses)
-            putStringArray(SerializedState::values.name, serializedState.values)
-        }
+        state = saveToBundle(serialize(gameUpdater.player))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putAll(state)
+        saveToFiles(serialize(gameUpdater.player))
     }
 
     private var state: Bundle? = null
 
     override fun onDestroy() {
         super.onDestroy()
-        job.cancel()
+        runBlocking { job.cancelAndJoin() }
     }
 }

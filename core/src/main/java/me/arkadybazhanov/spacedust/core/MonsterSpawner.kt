@@ -4,7 +4,7 @@ abstract class MonsterSpawner(
     val level: Level,
     val duration: Int,
     val delay: Int = 0,
-    override val saveId: Int = Game.getNextId()
+    override val saveId: Int = level.game.getNextId()
 ) : EventGenerator {
 
     abstract fun positionValidator(position: Position): Boolean
