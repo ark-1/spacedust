@@ -5,7 +5,7 @@ import me.arkadybazhanov.spacedust.core.CellType.*
 
 object LevelGeneration {
     inline fun <T : Character> generateLevelAndCreate(game: Game, characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateMaze(game, 31, 31)
+        val (level, position) = generateMaze(game, 31, 31, null, null)
         return create(level, position, characterSupplier)
     }
 
@@ -25,7 +25,7 @@ object LevelGeneration {
         defaultMonster(position).create()
     }
 
-    fun generateMaze(game: Game, w: Int, h: Int): Pair<Level, Position> {
+    fun generateMaze(game: Game, w: Int, h: Int, previousLevel: Level?, previousPosition: Position?): Pair<Level, Position> {
         require(w > 2 && h > 2) { "width and height should be > 2 (w = $w, h = $h)" }
 
         val edges = mutableSetOf<Position>()
@@ -72,6 +72,14 @@ object LevelGeneration {
                 if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
                 }
+            }
+
+            level.withPosition().filter { (_, cell) -> cell.isEmpty() && cell.type in BasicMonster.canStandIn }
+                .shuffled().first().second.type = DOWNSTAIRS
+
+            if (previousLevel != null) {
+                level[startPos].type = UPSTAIRS
+                game.stairsMap[level to startPos] = previousLevel to previousPosition!!
             }
 
             game.characters += game.time to DefaultMonsterSpawner(level)

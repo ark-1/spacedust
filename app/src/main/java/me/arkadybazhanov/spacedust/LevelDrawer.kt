@@ -60,6 +60,8 @@ class LevelDrawer(private val resources: Resources) {
         val cellId = when (type) {
             AIR -> air
             STONE -> stone
+            DOWNSTAIRS -> downstairs
+            UPSTAIRS -> downstairs
         }
         val id = when (characterType) {
             null -> null

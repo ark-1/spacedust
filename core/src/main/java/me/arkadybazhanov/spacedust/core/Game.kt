@@ -5,9 +5,10 @@ import java.util.PriorityQueue
 import kotlin.random.Random
 
 class Game(override val saveId: Int = getNextId()) : Savable {
-    override val refs get() = characters.map { it.second }.run {
-        current?.let { plus(it) } ?: this
-    }
+    override val refs
+        get() = characters.map { it.second }.run {
+            current?.let { plus(it) } ?: this
+        } + stairsMap.keys.map { it.first } + stairsMap.values.map { it.first }
 
     var time: Int = 0
         private set
@@ -18,6 +19,8 @@ class Game(override val saveId: Int = getNextId()) : Savable {
     )
 
     var current: EventGenerator? = null
+
+    val stairsMap: Cache<Pair<Level, Position>, Pair<Level, Position>> = Cache { (level, position) -> LevelGeneration.generateMaze(this, 31, 31, level, position) }
 
     suspend fun update(): Boolean {
         val next = current ?: run {
@@ -36,16 +39,19 @@ class Game(override val saveId: Int = getNextId()) : Savable {
         return true
     }
 
-    override fun save(): SavedGame = SavedGame(saveId, time, characters.map { it.first to it.second.saveId }, current?.saveId)
+    override fun save(): SavedGame = SavedGame(saveId, time, characters.map { it.first to it.second.saveId }, current?.saveId,
+        stairsMap.map {(key, value) -> (key.first.saveId to key.second) to (value.first.saveId to value.second)})
 
     @Serializable
     data class SavedGame(
         override val saveId: Int,
         val time: Int,
         val characters: List<Pair<Int, Int>>,
-        val current: Int?
+        val current: Int?,
+        val stairsMap: List<Pair<Pair<Int, Position>, Pair<Int, Position>>>
     ) : SavedWeak<Game> {
-        override val refs = characters.map(Pair<Int, Int>::second)
+        override val refs = characters.map(Pair<Int, Int>::second) +
+                stairsMap.map { it.first.first } + stairsMap.map { it.second.first }
 
         override fun initial() = Game(saveId).also { it.time = time }
 
@@ -54,6 +60,9 @@ class Game(override val saveId: Int = getNextId()) : Savable {
             if (current != null) {
                 initial.current = pool[current] as EventGenerator
             }
+            initial.stairsMap.putAll(stairsMap.map { (key, value) ->
+                (pool.load<Level>(key.first) to key.second) to (pool.load<Level>(value.first) to value.second)
+            })
         }
 
     }

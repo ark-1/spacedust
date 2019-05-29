@@ -11,7 +11,7 @@ class Cell(var type: CellType) {
 }
 
 enum class CellType {
-    STONE, AIR
+    STONE, AIR, DOWNSTAIRS, UPSTAIRS
 }
 
 class Level(

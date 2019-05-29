@@ -1,4 +1,4 @@
-package me.arkadybazhanov.spacedust
+package me.arkadybazhanov.spacedust.core
 
 class Cache<K, V> private constructor(
     private val map: MutableMap<K, V>,
