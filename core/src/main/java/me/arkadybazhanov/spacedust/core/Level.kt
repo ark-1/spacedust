@@ -17,7 +17,7 @@ enum class CellType {
 class Level(
     val game: Game,
     private val cells: Array2D<Cell>,
-    override val saveId: Int = Game.getNextId()
+    override val saveId: Int = game.getNextId()
 ) : Iterable<Cell>, Savable {
     override val refs get() = cells.flatMap { it.flatMap(Cell::events) + it.flatMap(Cell::items) } + game
 

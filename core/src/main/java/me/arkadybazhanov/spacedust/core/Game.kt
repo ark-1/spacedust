@@ -4,7 +4,11 @@ import kotlinx.serialization.Serializable
 import java.util.PriorityQueue
 import kotlin.random.Random
 
-class Game(override val saveId: Int = getNextId()) : Savable {
+class Game(override val saveId: Int = 0) : Savable {
+
+    private var nextId = 1
+    fun getNextId() = nextId++
+
     override val refs
         get() = characters.map { it.second }.run {
             current?.let { plus(it) } ?: this
@@ -39,12 +43,21 @@ class Game(override val saveId: Int = getNextId()) : Savable {
         return true
     }
 
-    override fun save(): SavedGame = SavedGame(saveId, time, characters.map { it.first to it.second.saveId }, current?.saveId,
-        stairsMap.map {(key, value) -> (key.first.saveId to key.second) to (value.first.saveId to value.second)})
+    override fun save(): SavedGame = SavedGame(
+        saveId = saveId,
+        nextId = nextId,
+        time = time,
+        characters = characters.map { it.first to it.second.saveId },
+        current = current?.saveId,
+        stairsMap = stairsMap.map { (key, value) ->
+            (key.first.saveId to key.second) to (value.first.saveId to value.second)
+        }
+    )
 
     @Serializable
     data class SavedGame(
         override val saveId: Int,
+        val nextId: Int,
         val time: Int,
         val characters: List<Pair<Int, Int>>,
         val current: Int?,
@@ -53,12 +66,15 @@ class Game(override val saveId: Int = getNextId()) : Savable {
         override val refs = characters.map(Pair<Int, Int>::second) +
                 stairsMap.map { it.first.first } + stairsMap.map { it.second.first }
 
-        override fun initial() = Game(saveId).also { it.time = time }
+        override fun initial() = Game(saveId).also {
+            it.nextId = nextId
+            it.time = time
+        }
 
         override fun restore(initial: Game, pool: Pool) {
             initial.characters.addAll(characters.map { it.first to (pool[it.second] as EventGenerator) })
             if (current != null) {
-                initial.current = pool[current] as EventGenerator
+                initial.current = pool.load(current)
             }
             initial.stairsMap.putAll(stairsMap.map { (key, value) ->
                 (pool.load<Level>(key.first) to key.second) to (pool.load<Level>(value.first) to value.second)
@@ -71,8 +87,5 @@ class Game(override val saveId: Int = getNextId()) : Savable {
         val seed = System.nanoTime()
         val random = Random(seed)
         fun withProbability(probability: Double) = random.nextDouble() < probability
-
-        private var nextId = 0
-        fun getNextId() = nextId++
     }
 }

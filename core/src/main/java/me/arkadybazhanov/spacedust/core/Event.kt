@@ -26,7 +26,7 @@ class Move(
         val character: Character,
         override val time: Int,
         override val duration: Int,
-        override val saveId: Int = Game.getNextId()
+        override val saveId: Int = character.game.getNextId()
     ) : Event {
         override val refs = listOf(character)
 
@@ -90,7 +90,7 @@ class Attack(
         val defender: Character,
         override val time: Int,
         override val duration: Int,
-        override val saveId: Int = Game.getNextId()
+        override val saveId: Int = attacker.game.getNextId()
     ) : Event {
         override val refs = listOf(attacker, defender)
 
@@ -145,7 +145,7 @@ class Spawn(
         override val time: Int,
         override val duration: Int,
         val character: Character,
-        override val saveId: Int = Game.getNextId()
+        override val saveId: Int = character.game.getNextId()
     ) : Event {
         override val refs = listOf(character)
 

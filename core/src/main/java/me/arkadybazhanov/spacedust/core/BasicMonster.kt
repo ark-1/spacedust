@@ -8,7 +8,7 @@ class BasicMonster(
     var speed: Int,
     override var hp: Int,
     override var strength: Int,
-    override val saveId: Int = Game.getNextId()
+    override val saveId: Int = level.game.getNextId()
 ) : Character {
     override val refs get() = inventory + (level as Savable)
     override val inventory = mutableListOf<Item>()
@@ -58,7 +58,7 @@ class BasicMonster(
 
     override fun die() {
         super.die()
-        cell.items += Weapon(5)
+        cell.items += Weapon(game, 5)
         cell.items += inventory
     }
 
