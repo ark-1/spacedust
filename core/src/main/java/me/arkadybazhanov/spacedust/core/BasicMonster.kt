@@ -59,6 +59,7 @@ class BasicMonster(
     override fun die() {
         super.die()
         cell.items += Weapon(5)
+        cell.items += inventory
     }
 
     @Serializable
