@@ -1,10 +1,8 @@
 package me.arkadybazhanov.spacedust
 
-import android.util.Log
 import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
-import java.lang.Math.*
 
 class Player(
     override var level: Level,
@@ -19,7 +17,7 @@ class Player(
         Array(lvl.h) { BooleanArray(lvl.w) }
     }
 ) : Character {
-    override val refs get() = inventory + (level as Savable)
+    override val refs get() = inventory + (level as Savable) + (discoveredCells.keys)
     override val inventory = view.inventory.items.apply { clear() }
 
     override val saveId: Int get() = PLAYER_SAVE_ID
@@ -34,7 +32,7 @@ class Player(
 
     override fun canMoveTo(position: Position): Boolean {
         return position.isValid(level.w, level.h)
-                && level[position].type == CellType.AIR
+                && level[position].type in canStandIn
     }
 
     override fun isVisible(position: Position): Boolean {
@@ -98,6 +96,7 @@ class Player(
         const val STARTING_STRENGTH = 20
         const val ATTACK_SPEED = 10
         const val MOVE_SPEED = 20
+        val canStandIn = listOf(CellType.AIR, CellType.DOWNSTAIRS, CellType.UPSTAIRS)
     }
 
     override fun toString() = "Player(id=$saveId)"
