@@ -71,4 +71,16 @@ class MainActivity : Activity(), CoroutineScope {
         super.onDestroy()
         runBlocking { job.cancelAndJoin() }
     }
+
+    fun restart() {
+        GlobalScope.launch {
+            job.cancelAndJoin()
+            job = Job()
+            this@MainActivity.launch {
+                gameUpdater = GameUpdater(gameView, null)
+                gameView.camera.reset(gameUpdater.player.position.x, gameUpdater.player.position.y)
+                gameUpdater.run()
+            }
+        }
+    }
 }

@@ -66,12 +66,14 @@ class Move(
             character.inventory += character.cell.items
             character.cell.items.clear()
         }
-        if (character.cell.type in listOf(CellType.DOWNSTAIRS, CellType.UPSTAIRS)) {
-            val res = character.game.stairsMap[character.level to character.position]
-            character.cell.character = null
-            character.level = res.first
-            character.position = res.second
-            character.cell.character = character
+        when (character.cell.type) {
+            CellType.DOWNSTAIRS, CellType.UPSTAIRS -> {
+                val res = character.game.stairsMap[character.level to character.position]
+                character.cell.character = null
+                character.move(res.first, res.second)
+                character.cell.character = character
+            }
+            else -> {}
         }
 
         return MoveEvent(character, time, duration)

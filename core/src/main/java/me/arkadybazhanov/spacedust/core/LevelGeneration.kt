@@ -5,7 +5,7 @@ import me.arkadybazhanov.spacedust.core.CellType.*
 
 object LevelGeneration {
     inline fun <T : Character> generateLevelAndCreate(game: Game, characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateMaze(game, 31, 31, null, null)
+        val (level, position) = generateMaze(game, 13, 13, null, null)
         return create(level, position, characterSupplier)
     }
 

@@ -11,6 +11,11 @@ interface Character : EventGenerator {
     fun canMoveTo(position: Position): Boolean
     fun isVisible(position: Position) : Boolean
 
+    fun move(level: Level, position: Position) {
+        this.level = level
+        this.position = position
+    }
+
     fun die() {
         cell.character = null
         game.characters -= game.characters.first { (_, character) -> character.saveId == saveId }

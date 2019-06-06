@@ -38,9 +38,7 @@ class GameView(context: Context, attributes: AttributeSet) :
     }
 
     val camera by lazy {
-        Camera(width, height).also {
-            println(width)
-        }
+        Camera(width, height, snapshot!!.playerSnapshot.x, snapshot!!.playerSnapshot.y)
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {}
@@ -95,4 +93,5 @@ class GameView(context: Context, attributes: AttributeSet) :
         return (scaleGestureDetector.onTouchEvent(event) or gestureDetector.onTouchEvent(event)) ||
             super.onTouchEvent(event)
     }
+
 }

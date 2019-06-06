@@ -21,7 +21,9 @@ class LevelSnapshot private constructor(
 
     data class PlayerSnapshot(
         val hp: Int,
-        val maxHp: Int
+        val maxHp: Int,
+        val x: Int,
+        val y: Int
     )
 
     constructor(level: Level, player: Player) : this(
@@ -36,7 +38,12 @@ class LevelSnapshot private constructor(
                     cell.items.lastOrNull()?.let { it::class }
                 )
             }
-        }, PlayerSnapshot(player.hp, Player.STARTING_HP))
+        }, PlayerSnapshot(
+            player.hp,
+            Player.STARTING_HP,
+            player.position.x,
+            player.position.y
+        ))
 
     fun withCoordinates() = iterator {
         for ((x, col) in cells.withIndex()) {

@@ -5,18 +5,20 @@ import android.animation.Animator.AnimatorListener
 import android.graphics.Path
 import kotlinx.coroutines.*
 import me.arkadybazhanov.spacedust.core.Direction
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class Camera(width: Int, height: Int) {
-    var scaleFactor = 1.7189566f
+class Camera(private val width: Int, private val height: Int, playerX: Int, playerY: Int) {
+    var scaleFactor = width / 10.cell
 
-    val shiftX = AtomicFloat(width / 4f)
-    val shiftY = AtomicFloat(height / 4f)
+    var shiftX = AtomicFloat((width / 2f) / scaleFactor - (playerX.cell + 1.cell / 2))
+    var shiftY = AtomicFloat((height / 2f) / scaleFactor - (playerY.cell + 1.cell / 2))
 
     private var updId = 0
 
     private val xDeltas = ConcurrentHashMap<Int, Float>()
     private val yDeltas = ConcurrentHashMap<Int, Float>()
+    private val animators = Collections.newSetFromMap(ConcurrentHashMap<Animator, Boolean>() as MutableMap<Animator, Boolean>)
 
     private fun addX(id: Int, deltaX: Float) {
         xDeltas.putIfAbsent(id, 0f)
@@ -73,6 +75,7 @@ class Camera(width: Int, height: Int) {
 
                 override fun onAnimationEnd(animation: Animator) {
                     strongReference = null
+                    animators.remove(animator)
                 }
 
                 override fun onAnimationRepeat(animation: Animator) {}
@@ -81,6 +84,16 @@ class Camera(width: Int, height: Int) {
             })
 
             animator.start()
+            animators.add(animator)
         }
+    }
+
+    fun reset(playerX: Int, playerY: Int) {
+        animators.forEach {
+            it.removeAllListeners()
+            GlobalScope.launch(Dispatchers.Main) { it.cancel() }
+        }
+        shiftX = AtomicFloat((width / 2f) / scaleFactor - (playerX.cell + 1.cell / 2))
+        shiftY = AtomicFloat((height / 2f) / scaleFactor - (playerY.cell + 1.cell / 2))
     }
 }

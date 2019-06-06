@@ -3,9 +3,11 @@ package me.arkadybazhanov.spacedust
 import kotlinx.serialization.Serializable
 import java.util.*
 import me.arkadybazhanov.spacedust.core.*
+import android.content.ContextWrapper
+import android.app.Activity
 
 class Player(
-    override var level: Level,
+    level: Level,
     position: Position,
     private val view: GameView,
     override var hp: Int,
@@ -17,16 +19,30 @@ class Player(
         Array(lvl.h) { BooleanArray(lvl.w) }
     }
 ) : Character {
+    override var level = level
+        set(value) {
+            field = value
+            view.camera.reset(position.x, position.y)
+        }
     override val refs get() = inventory + (level as Savable) + (discoveredCells.keys)
     override val inventory = view.inventory.items.apply { clear() }
 
     override val saveId: Int get() = PLAYER_SAVE_ID
 
-    override var position = position
+    private var _position = position
+
+    override var position: Position
+        get() = _position
         set(value) {
-            field = value
+            _position = value
             updateVisibility()
         }
+
+    override fun move(level: Level, position: Position) {
+        _position = position
+        this.level = level
+        this.position = position
+    }
 
     override val directions = Character.kingDirections
 
@@ -92,10 +108,20 @@ class Player(
         }
     }
 
+    override fun die() {
+        var context = view.context
+        while (context is ContextWrapper) {
+            if (context is Activity) {
+                (context as MainActivity).restart()
+            }
+            context = context.baseContext
+        }
+    }
+
     companion object {
         const val VISIBILITY_RANGE = 9
         const val PLAYER_SAVE_ID = -1
-        const val STARTING_HP = 100
+        const val STARTING_HP = 1
         const val STARTING_STRENGTH = 20
         const val ATTACK_SPEED = 10
         const val MOVE_SPEED = 20
@@ -129,4 +155,5 @@ class Player(
         discoveredCells.map { (level, cells) ->
             level.saveId to cells.map(BooleanArray::toTypedArray).toTypedArray()
         }.toTypedArray())
+
 }
