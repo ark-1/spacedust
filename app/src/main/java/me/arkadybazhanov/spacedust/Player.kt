@@ -22,7 +22,9 @@ class Player(
     override var level = level
         set(value) {
             field = value
-            view.camera.reset(position.x, position.y)
+            if (view.snapshot != null) {
+                view.camera.reset(position.x, position.y)
+            }
         }
     override val refs get() = inventory + (level as Savable) + (discoveredCells.keys)
     override val inventory = view.inventory.items.apply { clear() }
