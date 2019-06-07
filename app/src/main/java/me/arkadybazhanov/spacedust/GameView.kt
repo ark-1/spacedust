@@ -3,6 +3,7 @@ package me.arkadybazhanov.spacedust
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.support.constraint.ConstraintLayout
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.*
@@ -88,8 +89,11 @@ class GameView(context: Context, attributes: AttributeSet) :
         }
     }
 
+    private val parentLayout get() = parent as ConstraintLayout
+
     @SuppressLint("ClickableViewAccessibility") // Actually we ARE calling `performClick()` inside gestureDetector
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        parentLayout.editText?.isFocusable = false
         return (scaleGestureDetector.onTouchEvent(event) or gestureDetector.onTouchEvent(event)) ||
             super.onTouchEvent(event)
     }

@@ -1,11 +1,15 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id 'application'
 }
+
+mainClassName = "me.arkadybazhanov.spacedust.server.ServerKt"
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile 'org.jetbrains.exposed:exposed:0.13.7'
     compile "io.ktor:ktor-server-netty:$ktor_version"
+    compile "ch.qos.logback:logback-classic:1.2.3"
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
 }
 

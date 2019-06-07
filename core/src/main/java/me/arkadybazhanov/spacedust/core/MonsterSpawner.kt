@@ -13,7 +13,7 @@ abstract class MonsterSpawner(
     override val refs = listOf(level)
 
     final override tailrec suspend fun getNextEvent(): Spawn {
-        for ((pos, cell) in level.withPosition().shuffled(Game.random)) {
+        for ((pos, cell) in level.withPosition().shuffled(level.game.random)) {
             if (cell.isEmpty() && positionValidator(pos)) {
                 return Spawn(level.game.time, duration, delay) { spawn(pos) }
             }

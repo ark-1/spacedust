@@ -2,6 +2,7 @@ package me.arkadybazhanov.spacedust.core
 
 import kotlinx.serialization.Serializable
 import me.arkadybazhanov.spacedust.core.CellType.*
+import kotlin.random.asKotlinRandom
 import me.arkadybazhanov.spacedust.core.Monster.MonsterType.*
 
 object LevelGeneration {
@@ -44,7 +45,7 @@ object LevelGeneration {
         }
 
         while (edges.isNotEmpty()) {
-            val edge = edges.random(Game.random).also { edges.remove(it) }
+            val edge = edges.random(game.random.asKotlinRandom()).also { edges.remove(it) }
             val (v1, v2) = if (edge.x % 2 == 0) {
                 Position(edge.x - 1, edge.y) to Position(edge.x + 1, edge.y)
             } else {
@@ -52,7 +53,7 @@ object LevelGeneration {
             }
 
             cells[edge.x][edge.y] = if (connectivity.areConnected(v1, v2)) {
-                if (Game.withProbability(0.1)) {
+                if (game.withProbability(0.1)) {
                     Cell(AIR)
                 } else {
                     Cell(STONE)
@@ -72,7 +73,7 @@ object LevelGeneration {
         @Suppress("UNCHECKED_CAST")
         return Level(game, cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
-                if (cell.type in Monster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
+                if (cell.type in Monster.canStandIn && pos != startPos && game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
                 }
             }
@@ -115,7 +116,7 @@ object LevelGeneration {
             Cell(AIR)
         })
 
-        level.withPosition().shuffled(Game.random).first { (pos, _) ->
+        level.withPosition().shuffled(game.random).first { (pos, _) ->
             pos.y != 0 || pos.x == 1
         }.second.type = STONE
 

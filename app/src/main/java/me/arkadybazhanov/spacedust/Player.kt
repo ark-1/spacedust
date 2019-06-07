@@ -27,7 +27,7 @@ class Player(
                 view.camera.reset(position.x, position.y)
             }
         }
-    override val refs get() = inventory + (level as Savable) + (discoveredCells.keys)
+    override val refs get() = inventory + level as Savable + discoveredCells.keys
     override val inventory = view.inventory.items.apply { clear() }
 
     override val saveId: Int get() = PLAYER_SAVE_ID

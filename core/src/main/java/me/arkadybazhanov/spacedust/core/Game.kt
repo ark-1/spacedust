@@ -1,10 +1,12 @@
 package me.arkadybazhanov.spacedust.core
 
+import kotlinx.serialization.*
 import kotlinx.serialization.Serializable
-import java.util.PriorityQueue
-import kotlin.random.Random
+import kotlinx.serialization.internal.ReferenceArraySerializer
+import java.io.*
+import java.util.*
 
-class Game(override val saveId: Int = 0) : Savable {
+class Game(override val saveId: Int = 0, random: Random? = null) : Savable {
 
     private var nextId = 1
     fun getNextId() = nextId++
@@ -51,22 +53,28 @@ class Game(override val saveId: Int = 0) : Savable {
         current = current?.saveId,
         stairsMap = stairsMap.map { (key, value) ->
             (key.first.saveId to key.second) to (value.first.saveId to value.second)
-        }
+        },
+        random = serializeRandom()
     )
 
     @Serializable
-    data class SavedGame(
+    class SavedGame(
         override val saveId: Int,
         val nextId: Int,
         val time: Int,
         val characters: List<Pair<Int, Int>>,
         val current: Int?,
-        val stairsMap: List<Pair<Pair<Int, Position>, Pair<Int, Position>>>
+        val stairsMap: List<Pair<Pair<Int, Position>, Pair<Int, Position>>>,
+        val random: String
     ) : SavedWeak<Game> {
-        override val refs = characters.map(Pair<Int, Int>::second) +
-                stairsMap.map { it.first.first } + stairsMap.map { it.second.first }
+        override val refs = characters.map(Pair<Int, Int>::second) + stairsMap.map { it.first.first } + stairsMap.map { it.second.first }
 
-        override fun initial() = Game(saveId).also {
+        private fun deserializeRandom(): Random = ByteArrayInputStream(random.toByteArray(Charsets.ISO_8859_1)).run {
+            ReferenceArraySerializer(Any::class, String.serializer()).list
+            ObjectInputStream(this).use { it.readObject() as Random }
+        }
+
+        override fun initial() = Game(saveId, random = deserializeRandom()).also {
             it.nextId = nextId
             it.time = time
         }
@@ -83,9 +91,14 @@ class Game(override val saveId: Int = 0) : Savable {
 
     }
 
+    val random = random ?: Random(seed)
+    fun withProbability(probability: Double) = random.nextDouble() < probability
+
+    private fun serializeRandom(): String = ByteArrayOutputStream().apply {
+        ObjectOutputStream(this).use { it.writeObject(random) }
+    }.toByteArray().toString(Charsets.ISO_8859_1)
+
     companion object {
-        val seed = System.nanoTime()
-        val random = Random(seed)
-        fun withProbability(probability: Double) = random.nextDouble() < probability
+        private const val seed = 0L
     }
 }

@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">SpaceDust</string>
     <string name="inventory">Inventory</string>
+    <string name="name" />
+    <string name="name_description">Username</string>
+    <string name="downloadButtonText">Download</string>
+    <string name="uploadButtonText">Upload</string>
 </resources>
