@@ -11,7 +11,7 @@ class Player(
     position: Position,
     private val view: GameView,
     override var hp: Int,
-    override val maxHp: Int,
+    override var maxHp: Int,
     override var strength: Int,
     val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
         Array(lvl.h) { BooleanArray(lvl.w) }
@@ -138,7 +138,7 @@ class Player(
         const val PLAYER_SAVE_ID = -1
         const val STARTING_HP = 100
         const val STARTING_STRENGTH = 20
-        const val ATTACK_SPEED = 10
+        const val ATTACK_SPEED = 20
         const val MOVE_SPEED = 20
         val canStandIn = listOf(CellType.AIR, CellType.DOWNSTAIRS, CellType.UPSTAIRS)
     }

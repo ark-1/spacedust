@@ -7,8 +7,8 @@ class Monster(
     override var level: Level,
     override var position: Position,
     var speed: Int,
-    override var hp: Int,
-    override val maxHp: Int,
+    override var maxHp: Int,
+    override var hp: Int = maxHp,
     override var strength: Int,
     val type: MonsterType,
     override val saveId: Int = level.game.getNextId()
@@ -91,7 +91,7 @@ class Monster(
         override val refs = listOf(level)
 
         override fun initial(pool: Pool): Monster =
-            Monster(pool.load(level), position, speed, hp, maxHp, strength, monsterType, saveId).apply {
+            Monster(pool.load(level), position, speed, maxHp, hp, strength, monsterType, saveId).apply {
                 inventory += this@SavedBasicMonster.inventory.map {id -> pool.load<Item>(id)}
             }
     }
