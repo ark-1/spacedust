@@ -19,8 +19,7 @@ class MainActivity : Activity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //state = loadFromFiles()?.let { saveToBundle(it) }
-        state = null
+        state = loadFromFiles()?.let { saveToBundle(it) }
 
         window.setFlags(FLAG_FULLSCREEN, FLAG_FULLSCREEN)
 
@@ -37,7 +36,7 @@ class MainActivity : Activity(), CoroutineScope {
             inventoryView.visibility = if (inventoryView.visibility == GONE) VISIBLE else GONE
         }
 
-        //savedInstanceState?.let { state = it } ?: loadFromFiles()?.let { state = saveToBundle(it) }
+        savedInstanceState?.let { state = it } ?: loadFromFiles()?.let { state = saveToBundle(it) }
     }
 
     override fun onResume() {

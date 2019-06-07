@@ -131,6 +131,7 @@ class Attack(
 
     override fun perform(): AttackEvent {
         defender.hp -= attacker.strength
+        attacker.inventory.map { if (it is Weapon) it.damage else 0 }.max()?.let { defender.hp -= it }
         if (defender.hp <= 0) {
             defender.die()
         }

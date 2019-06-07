@@ -67,7 +67,11 @@ class Monster(
 
     override fun die() {
         super.die()
-        cell.items += HealKit(game, 30)
+        if (Game.random.nextDouble() < 0.05) {
+            cell.items += Weapon(game, level.difficulty, WeaponType.values().random(Game.random))
+        } else if (Game.random.nextDouble() < 0.3) {
+            cell.items += HealKit(game, 30)
+        }
         cell.items += inventory
     }
 

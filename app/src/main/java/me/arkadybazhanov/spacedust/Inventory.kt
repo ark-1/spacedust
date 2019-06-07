@@ -6,9 +6,11 @@ import android.widget.*
 import kotlinx.android.synthetic.main.item_view.view.*
 import me.arkadybazhanov.spacedust.Inventory.ItemHolder
 import me.arkadybazhanov.spacedust.core.Item
+import me.arkadybazhanov.spacedust.core.Weapon
 
 class Inventory : RecyclerView.Adapter<ItemHolder>() {
     private val _items: MutableList<Item> = mutableListOf()
+    private var bestWeaponIndex = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val view = LayoutInflater
@@ -20,7 +22,12 @@ class Inventory : RecyclerView.Adapter<ItemHolder>() {
     override fun getItemCount(): Int = _items.size
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
-        holder.textView.text = _items[position].name
+        println(position)
+        val text = _items[position].name +
+                (_items[position] as? Weapon)?.let {
+                    " (damage: ${it.damage})"
+                }
+        holder.textView.text = text
     }
 
     class ItemHolder(private val view: View) : RecyclerView.ViewHolder(view) {
@@ -31,7 +38,12 @@ class Inventory : RecyclerView.Adapter<ItemHolder>() {
         override val size: Int get() = _items.size
         override fun add(index: Int, element: Item) = _items.add(index, element).also { notifyItemInserted(index) }
         override fun get(index: Int): Item = _items[index]
-        override fun removeAt(index: Int): Item = _items.removeAt(index).also { notifyItemRemoved(index) }
+        override fun removeAt(index: Int): Item = _items.removeAt(index).also {
+            if (_items.size == 0) {
+                bestWeaponIndex = -1
+            }
+            notifyItemRemoved(index)
+        }
         override fun set(index: Int, element: Item): Item = _items.set(index, element).also { notifyItemChanged(index) }
     }
 }

@@ -70,7 +70,9 @@ object LevelGeneration {
         val startPos = Position(1, 1)
 
         @Suppress("UNCHECKED_CAST")
-        return Level(game, cells as Array<Array<Cell>>).also { level ->
+        return Level(game,
+            (previousLevel?.difficulty ?: 0) + 1,
+            cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
                 if (cell.type in Monster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
@@ -111,7 +113,7 @@ object LevelGeneration {
         Monster(this, position, 20, 100, 100, 10, UPSET)
 
     fun generateSmallRoom(game: Game): Pair<Level, Position> {
-        val level = Level(game, array2D(3, 3) { _, _ ->
+        val level = Level(game, 1, array2D(3, 3) { _, _ ->
             Cell(AIR)
         })
 

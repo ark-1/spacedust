@@ -15,8 +15,14 @@ enum class WeaponType {
     STICK, BRANCH, HAMMER
 }
 
-class Weapon(val game: Game, val damage: Int, val type: WeaponType, override val saveId: Int = game.getNextId()) : Item {
-    override fun save() = SavedWeapon(saveId = saveId, game = game.saveId, damage = damage, type = type)
+class Weapon(val game: Game, val difficulty: Int, val type: WeaponType, override val saveId: Int = game.getNextId()) : Item {
+    override fun save() = SavedWeapon(saveId = saveId, game = game.saveId, difficulty = difficulty, type = type)
+
+    val damage = difficulty * 10 * when (type) {
+        STICK -> 1
+        BRANCH -> 2
+        HAMMER -> 3
+    }
 
     override val name = when (type) {
         STICK -> "stick"
@@ -30,12 +36,12 @@ class Weapon(val game: Game, val damage: Int, val type: WeaponType, override val
     class SavedWeapon(
         override val saveId: Int,
         val game: Int,
-        val damage: Int,
+        val difficulty: Int,
         val type: WeaponType
     ) : SavedStrong<Weapon> {
         override val refs = listOf<Int>()
 
-        override fun initial(pool: Pool): Weapon = Weapon(pool.load(game), damage, type, saveId)
+        override fun initial(pool: Pool): Weapon = Weapon(pool.load(game), difficulty, type, saveId)
     }
 }
 

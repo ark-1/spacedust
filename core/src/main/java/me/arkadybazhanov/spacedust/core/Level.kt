@@ -16,6 +16,7 @@ enum class CellType {
 
 class Level(
     val game: Game,
+    val difficulty: Int,
     private val cells: Array2D<Cell>,
     override val saveId: Int = game.getNextId()
 ) : Iterable<Cell>, Savable {
@@ -56,11 +57,12 @@ class Level(
     class SavedLevel(
         override val saveId: Int,
         val game: Int,
+        val difficulty: Int,
         val cells: Array2D<SavedCell>
     ) : SavedStrong<Level> {
         override val refs = cells.flatMap { it.flatMap(SavedCell::events) + it.flatMap(SavedCell::items) }
 
-        override fun initial(pool: Pool) = Level(pool.load(game), cells.map {
+        override fun initial(pool: Pool) = Level(pool.load(game), difficulty, cells.map {
             Cell(it.type)
         })
 
@@ -77,7 +79,7 @@ class Level(
 
     }
 
-    override fun save() = SavedLevel(saveId, game.saveId, cells.map {
+    override fun save() = SavedLevel(saveId, game.saveId, difficulty, cells.map {
         SavedCell(
             it.type,
             it.events.map(Event::saveId),
