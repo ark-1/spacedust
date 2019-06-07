@@ -1,6 +1,7 @@
 package me.arkadybazhanov.spacedust.core
 
 import kotlinx.serialization.Serializable
+import kotlin.random.asKotlinRandom
 
 class Monster(
     override var level: Level,
@@ -67,9 +68,9 @@ class Monster(
 
     override fun die() {
         super.die()
-        if (Game.random.nextDouble() < 0.05) {
-            cell.items += Weapon(game, level.difficulty, WeaponType.values().random(Game.random))
-        } else if (Game.random.nextDouble() < 0.3) {
+        if (game.random.nextDouble() < 0.05) {
+            cell.items += Weapon(game, level.difficulty, WeaponType.values().random(game.random.asKotlinRandom()))
+        } else if (game.random.nextDouble() < 0.3) {
             cell.items += HealKit(game, 30)
         }
         cell.items += inventory
