@@ -6,14 +6,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.call
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.FormDataContent
-import io.ktor.client.response.*
 import io.ktor.http.*
-import io.ktor.http.HttpMethod.Companion
 import kotlinx.serialization.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import java.io.*
-import java.util.Properties
 
 private const val kClassesFileName = "kClasses.data"
 private const val valuesFileName = "values.data"
@@ -27,7 +24,7 @@ private fun Context.writeStringArray(array: Array<String>, fileName: String) {
 
 private fun Array<String>.stringify() = json.stringify(String.serializer().list, asList())
 
-fun Context.saveToFiles(state: SerializedState, name: String?) {
+fun Context.saveToFiles(state: SerializedState) {
     writeStringArray(state.kClasses, kClassesFileName)
     writeStringArray(state.values, valuesFileName)
 }
