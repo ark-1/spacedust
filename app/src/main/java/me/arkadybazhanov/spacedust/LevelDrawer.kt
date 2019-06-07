@@ -4,8 +4,10 @@ import android.content.res.Resources
 import android.graphics.*
 import me.arkadybazhanov.spacedust.LevelSnapshot.CellSnapshot
 import me.arkadybazhanov.spacedust.R.drawable.*
+import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.CellType.*
-import me.arkadybazhanov.spacedust.core.Position
+import me.arkadybazhanov.spacedust.core.Monster.MonsterType.*
+import me.arkadybazhanov.spacedust.core.WeaponType.*
 
 class LevelDrawer(private val resources: Resources) {
     private fun square(left: Float, top: Float, width: Float) = RectF(
@@ -22,12 +24,26 @@ class LevelDrawer(private val resources: Resources) {
 
         for ((x, y, cell) in level.withCoordinates()) {
             if (cell.discovered) {
-                val (bm, bm2) = cell.toBitmaps()
-                val src = Rect(0, 0, bm.width, bm.height)
+                val (bms, bm2) = cell.toBitmaps()
                 val dst = square(x.cell, y.cell, 1.cell)
-                canvas.drawBitmap(bm, src, dst, null)
+                for (bm in bms) {
+                    val src = Rect(0, 0, bm.width, bm.height)
+                    canvas.drawBitmap(bm, src, dst, null)
+                }
                 if (cell.visible) {
-                    bm2?.let { canvas.drawBitmap(it, src, dst, null) }
+                    bm2?.let {
+                        val final = if (cell.characterType != null
+                                && cell.characterType == Player::class
+                                && level.playerSnapshot.turn == Player.Turn.LEFT) {
+                            val matrix = Matrix()
+                            matrix.postScale(-1f, 1f)
+                            Bitmap.createBitmap(bm2, 0, 0, bm2.width, bm2.height, matrix, true)
+                        } else {
+                            bm2
+                        }
+                        val src = Rect(0, 0, final.width, final.height)
+                        canvas.drawBitmap(final, src, dst, null)
+                    }
                 } else {
                     canvas.drawRect(dst, Paint().apply { color = Color.argb(100, 0, 0, 0) })
                 }
@@ -56,23 +72,41 @@ class LevelDrawer(private val resources: Resources) {
                 ).also { cache[id] = it }
     }
 
-    private fun CellSnapshot.toBitmaps(): Pair<Bitmap, Bitmap?> {
+    private fun CellSnapshot.toBitmaps(): Pair<Iterable<Bitmap>, Bitmap?> {
         val cellId = when (type) {
             AIR -> air
             STONE -> stone
             DOWNSTAIRS -> downstairs
-            UPSTAIRS -> downstairs
+            UPSTAIRS -> upstairs
+        }
+        val backgroundId = when (type) {
+            UPSTAIRS -> air
+            else -> null
         }
         val id = when (characterType) {
-            null -> null
             Player::class -> player
-            else -> monster
+            Monster::class -> when (monsterType) {
+                BASIC -> monster
+                UPSET -> upset
+                ROBOT -> robot
+                else -> null
+            }
+            else -> null
         }
         val itemId = when (itemType) {
-            null -> null
-            else -> player
+            Weapon::class -> when (weaponType) {
+                STICK -> stick
+                BRANCH -> branch
+                HAMMER -> hammer
+                else -> null
+            }
+            HealKit::class -> heal
+            else -> null
         }
-        return bitmaps[cellId] to (id?.let { bitmaps[it] } ?: (itemId?.let { bitmaps[it] } ))
+        return mutableListOf<Int>().apply {
+            if (backgroundId != null) add(backgroundId)
+            add(cellId)
+        }.map { bitmaps[it] } to (id?.let { bitmaps[it] } ?: itemId?.let { bitmaps[it] })
     }
 
     fun getCell(level: LevelSnapshot, camera: Camera, x: Float, y: Float): Position? {

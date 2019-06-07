@@ -5,8 +5,9 @@ import kotlinx.serialization.json.Json
 import me.arkadybazhanov.spacedust.Player.SavedPlayer
 import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.Attack.AttackEvent.SavedAttackEvent
-import me.arkadybazhanov.spacedust.core.BasicMonster.SavedBasicMonster
+import me.arkadybazhanov.spacedust.core.Monster.SavedBasicMonster
 import me.arkadybazhanov.spacedust.core.Game.SavedGame
+import me.arkadybazhanov.spacedust.core.HealKit.*
 import me.arkadybazhanov.spacedust.core.Level.SavedLevel
 import me.arkadybazhanov.spacedust.core.LevelGeneration.DefaultMonsterSpawner.SavedDefaultMonsterSpawner
 import me.arkadybazhanov.spacedust.core.Move.MoveEvent.SavedMoveEvent
@@ -65,6 +66,7 @@ private val savedClasses = mutableMapOf<String, KClass<out Saved<*>>>().apply {
     add<SavedLevel>()
     add<SavedDefaultMonsterSpawner>()
     add<SavedWeapon>()
+    add<SavedHealKit>()
 }
 
 private fun forName(className: String): KClass<*> = try {

@@ -9,7 +9,12 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class Camera(private val width: Int, private val height: Int, playerX: Int, playerY: Int) {
-    var scaleFactor = width / 10.cell
+
+    companion object {
+        private const val WIDTH_IN_CELLS = 10
+    }
+
+    var scaleFactor = width / WIDTH_IN_CELLS.cell
 
     var shiftX = AtomicFloat((width / 2f) / scaleFactor - (playerX.cell + 1.cell / 2))
     var shiftY = AtomicFloat((height / 2f) / scaleFactor - (playerY.cell + 1.cell / 2))

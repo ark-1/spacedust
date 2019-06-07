@@ -63,7 +63,9 @@ class Move(
         character.position = to
         character.cell.character = character
         if (character.cell.items.isNotEmpty()) {
-            character.inventory += character.cell.items
+            for (item in character.cell.items) {
+                item.process(character)
+            }
             character.cell.items.clear()
         }
         when (character.cell.type) {

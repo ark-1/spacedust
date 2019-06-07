@@ -2,14 +2,21 @@ package me.arkadybazhanov.spacedust.core
 
 import kotlinx.serialization.Serializable
 
-class BasicMonster(
+class Monster(
     override var level: Level,
     override var position: Position,
     var speed: Int,
     override var hp: Int,
+    override val maxHp: Int,
     override var strength: Int,
+    val type: MonsterType,
     override val saveId: Int = level.game.getNextId()
 ) : Character {
+
+    enum class MonsterType {
+        BASIC, UPSET, ROBOT
+    }
+
     override val refs get() = inventory + (level as Savable)
     override val inventory = mutableListOf<Item>()
 
@@ -44,7 +51,7 @@ class BasicMonster(
         val canStandIn = listOf(CellType.AIR)
     }
 
-    override fun toString() = "BasicMonster(id=$saveId)"
+    override fun toString() = "Monster(id=$saveId)"
 
     override fun save() = SavedBasicMonster(
         saveId,
@@ -52,13 +59,15 @@ class BasicMonster(
         position,
         speed,
         hp,
+        maxHp,
         strength,
-        inventory.map(Item::saveId)
+        inventory.map(Item::saveId),
+        type
     )
 
     override fun die() {
         super.die()
-        cell.items += Weapon(game, 5)
+        cell.items += HealKit(game, 30)
         cell.items += inventory
     }
 
@@ -68,14 +77,16 @@ class BasicMonster(
         val level: Int,
         val position: Position,
         val speed: Int,
+        val hp: Int,
         val maxHp: Int,
         val strength: Int,
-        val inventory: List<Int>
-    ) : SavedStrong<BasicMonster> {
+        val inventory: List<Int>,
+        val monsterType: MonsterType
+    ) : SavedStrong<Monster> {
         override val refs = listOf(level)
 
-        override fun initial(pool: Pool): BasicMonster =
-            BasicMonster(pool.load(level), position, speed, maxHp, strength, saveId).apply {
+        override fun initial(pool: Pool): Monster =
+            Monster(pool.load(level), position, speed, hp, maxHp, strength, monsterType, saveId).apply {
                 inventory += this@SavedBasicMonster.inventory.map {id -> pool.load<Item>(id)}
             }
     }

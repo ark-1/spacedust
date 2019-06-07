@@ -11,6 +11,7 @@ class Player(
     position: Position,
     private val view: GameView,
     override var hp: Int,
+    override val maxHp: Int,
     override var strength: Int,
     val discoveredCells: Cache<Level, Array<BooleanArray>> = Cache { lvl ->
         Array(lvl.h) { BooleanArray(lvl.w) }
@@ -33,9 +34,21 @@ class Player(
 
     private var _position = position
 
+    enum class Turn {
+        LEFT, RIGHT
+    }
+
+    var turn: Turn = Turn.RIGHT
+
     override var position: Position
         get() = _position
         set(value) {
+            val dir = value.minus(_position)
+            if (dir.x < 0) {
+                turn = Turn.LEFT
+            } else if (dir.x > 0) {
+                turn = Turn.RIGHT
+            }
             _position = value
             updateVisibility()
         }
@@ -123,7 +136,7 @@ class Player(
     companion object {
         const val VISIBILITY_RANGE = 9
         const val PLAYER_SAVE_ID = -1
-        const val STARTING_HP = 1
+        const val STARTING_HP = 100
         const val STARTING_STRENGTH = 20
         const val ATTACK_SPEED = 10
         const val MOVE_SPEED = 20
@@ -137,6 +150,7 @@ class Player(
         val level: Int,
         val position: Position,
         val hp: Int,
+        val maxHp: Int,
         val strength: Int,
         val inventory: List<Int>,
         val discoveredCells: Array<Pair<Int, Array<Array<Boolean>>>>
@@ -144,7 +158,7 @@ class Player(
         override val saveId: Int get() = PLAYER_SAVE_ID
         override val refs = inventory + level
         override fun initial(pool: Pool): Player = Player(pool.load(level), position,
-            (pool as CachePool).view, hp, strength).apply {
+            (pool as CachePool).view, hp, maxHp, strength).apply {
             discoveredCells.putAll(this@SavedPlayer.discoveredCells.associate {
                 pool.load<Level>(it.first) to it.second.map(Array<Boolean>::toBooleanArray).toTypedArray()
             })
@@ -152,7 +166,7 @@ class Player(
         }
     }
 
-    override fun save() = SavedPlayer(level.saveId, position, hp, strength,
+    override fun save() = SavedPlayer(level.saveId, position, hp, maxHp, strength,
         inventory.map(Item::saveId),
         discoveredCells.map { (level, cells) ->
             level.saveId to cells.map(BooleanArray::toTypedArray).toTypedArray()

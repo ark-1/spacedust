@@ -2,10 +2,13 @@ package me.arkadybazhanov.spacedust.core
 
 import kotlinx.serialization.Serializable
 import me.arkadybazhanov.spacedust.core.CellType.*
+import me.arkadybazhanov.spacedust.core.Monster.MonsterType.*
 
 object LevelGeneration {
+    const val DEFAULT_LEVEL_SIZE = 13
+
     inline fun <T : Character> generateLevelAndCreate(game: Game, characterSupplier: (Level, Position) -> T): Pair<Level, T> {
-        val (level, position) = generateMaze(game, 13, 13, null, null)
+        val (level, position) = generateMaze(game, DEFAULT_LEVEL_SIZE, DEFAULT_LEVEL_SIZE, null, null)
         return create(level, position, characterSupplier)
     }
 
@@ -69,12 +72,12 @@ object LevelGeneration {
         @Suppress("UNCHECKED_CAST")
         return Level(game, cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
-                if (cell.type in BasicMonster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
+                if (cell.type in Monster.canStandIn && pos != startPos && Game.withProbability(0.0/*5*/)) {
                     level.createDefaultMonster(pos)
                 }
             }
 
-            level.withPosition().filter { (_, cell) -> cell.isEmpty() && cell.type in BasicMonster.canStandIn }
+            level.withPosition().filter { (_, cell) -> cell.isEmpty() && cell.type in Monster.canStandIn }
                 .shuffled().first().second.type = DOWNSTAIRS
 
             if (previousLevel != null) {
@@ -88,7 +91,7 @@ object LevelGeneration {
 
     class DefaultMonsterSpawner(level: Level) : MonsterSpawner(level, duration = 40, delay = 100) {
         override fun positionValidator(position: Position): Boolean {
-            return level[position].type in BasicMonster.canStandIn
+            return level[position].type in Monster.canStandIn
         }
 
         override fun spawn(position: Position): Character {
@@ -105,7 +108,7 @@ object LevelGeneration {
     }
 
     private fun Level.defaultMonster(position: Position) =
-        BasicMonster(this, position, 20, 100, 10)
+        Monster(this, position, 20, 100, 100, 10, UPSET)
 
     fun generateSmallRoom(game: Game): Pair<Level, Position> {
         val level = Level(game, array2D(3, 3) { _, _ ->

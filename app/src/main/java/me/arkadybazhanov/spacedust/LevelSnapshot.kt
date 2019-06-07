@@ -1,6 +1,7 @@
 package me.arkadybazhanov.spacedust
 
 import me.arkadybazhanov.spacedust.core.*
+import me.arkadybazhanov.spacedust.core.Monster.MonsterType
 import kotlin.reflect.KClass
 
 class LevelSnapshot private constructor(
@@ -11,9 +12,11 @@ class LevelSnapshot private constructor(
     data class CellSnapshot(
         val type: CellType,
         val characterType: KClass<out Character>?,
+        val monsterType: MonsterType?,
         val discovered: Boolean,
         val visible: Boolean,
-        val itemType: KClass<out Item>?
+        val itemType: KClass<out Item>?,
+        val weaponType: WeaponType?
     )
 
     val w = cells.size
@@ -23,7 +26,8 @@ class LevelSnapshot private constructor(
         val hp: Int,
         val maxHp: Int,
         val x: Int,
-        val y: Int
+        val y: Int,
+        val turn: Player.Turn
     )
 
     constructor(level: Level, player: Player) : this(
@@ -33,16 +37,19 @@ class LevelSnapshot private constructor(
                 CellSnapshot(
                     cell.type,
                     cell.character?.let { it::class },
+                    (cell.character as? Monster)?.type,
                     player.discoveredCells.getValue(level)[x][y],
                     player.visibleCells.getValue(level)[x][y],
-                    cell.items.lastOrNull()?.let { it::class }
+                    cell.items.lastOrNull()?.let { it::class },
+                    (cell.items.lastOrNull() as? Weapon)?.type
                 )
             }
         }, PlayerSnapshot(
             player.hp,
             Player.STARTING_HP,
             player.position.x,
-            player.position.y
+            player.position.y,
+            player.turn
         ))
 
     fun withCoordinates() = iterator {
