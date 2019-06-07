@@ -1,7 +1,7 @@
 package me.arkadybazhanov.spacedust
 
 import kotlinx.serialization.*
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import me.arkadybazhanov.spacedust.Player.SavedPlayer
 import me.arkadybazhanov.spacedust.core.*
 import me.arkadybazhanov.spacedust.core.Attack.AttackEvent.SavedAttackEvent
@@ -15,21 +15,24 @@ import me.arkadybazhanov.spacedust.core.Spawn.SpawnEvent.SavedSpawnEvent
 import me.arkadybazhanov.spacedust.core.Weapon.*
 import kotlin.reflect.KClass
 
-class SerializedState(val kClasses: Array<String>, val values: Array<String>)
+class SerializedState(val kClasses: Array<String>, val values: Array<String>, val name: String?)
 
-fun serialize(player: Player): SerializedState {
+fun serialize(player: Player, name: String?): SerializedState {
     val saved = save(player).values
     return SerializedState(
         saved.map { it::class.qualifiedName!! }.toTypedArray(),
         saved.map {
             stringifyDynamic(it::class.serializer(), it)
-        }.toTypedArray()
+        }.toTypedArray(),
+        name
     )
 }
 
+val json = Json(JsonConfiguration.Stable)
+
 private fun <T> stringifyDynamic(ser: KSerializer<T>, obj: Any): String {
     @Suppress("UNCHECKED_CAST")
-    return Json.stringify(ser, obj as T)
+    return json.stringify(ser, obj as T)
 }
 
 fun save(savable: Savable): Map<Savable, Saved<*>> = mutableMapOf<Savable, Saved<*>>().also {
@@ -77,7 +80,7 @@ private fun forName(className: String): KClass<*> = try {
 
 fun SerializedState.restorePlayer(view: GameView): Player {
     val saved = List(values.size) {
-        Json.parse(forName(kClasses[it]).serializer(), values[it]) as Saved<*>
+        json.parse(forName(kClasses[it]).serializer(), values[it]) as Saved<*>
     }.associateBy { it.saveId }
 
     val pool = CachePool(view) { id, pool ->

@@ -20,7 +20,6 @@ class HealthView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     override fun surfaceCreated(holder: SurfaceHolder) {
         ViewUpdater.healthSurfaceHolder = holder
         ViewUpdater.healthView = this
-        println("$height $y ${(parent as ConstraintLayout).y}")
     }
 
     override fun draw(canvas: Canvas) {
