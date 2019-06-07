@@ -6,7 +6,7 @@ interface Character : EventGenerator {
     val directions: List<Direction>
     val inventory: MutableList<Item>
     var hp: Int
-    val maxHp: Int
+    var maxHp: Int
     var strength: Int
 
     fun canMoveTo(position: Position): Boolean

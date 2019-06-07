@@ -6,7 +6,7 @@ import kotlin.random.asKotlinRandom
 import me.arkadybazhanov.spacedust.core.Monster.MonsterType.*
 
 object LevelGeneration {
-    const val DEFAULT_LEVEL_SIZE = 13
+    const val DEFAULT_LEVEL_SIZE = 20
 
     inline fun <T : Character> generateLevelAndCreate(game: Game, characterSupplier: (Level, Position) -> T): Pair<Level, T> {
         val (level, position) = generateMaze(game, DEFAULT_LEVEL_SIZE, DEFAULT_LEVEL_SIZE, null, null)
@@ -25,8 +25,8 @@ object LevelGeneration {
         return level to character
     }
 
-    private fun Level.createDefaultMonster(position: Position) {
-        defaultMonster(position).create()
+    private fun Level.createMonster(position: Position) {
+        randomMonster(position).create()
     }
 
     fun generateMaze(game: Game, w: Int, h: Int, previousLevel: Level?, previousPosition: Position?): Pair<Level, Position> {
@@ -75,8 +75,8 @@ object LevelGeneration {
             (previousLevel?.difficulty ?: 0) + 1,
             cells as Array<Array<Cell>>).also { level ->
             for ((pos, cell) in level.withPosition()) {
-                if (cell.type in Monster.canStandIn && pos != startPos && game.withProbability(0.0/*5*/)) {
-                    level.createDefaultMonster(pos)
+                if (cell.type in Monster.canStandIn && pos != startPos && game.withProbability(0.01)) {
+                    level.createMonster(pos)
                 }
             }
 
@@ -98,7 +98,7 @@ object LevelGeneration {
         }
 
         override fun spawn(position: Position): Character {
-            return level.defaultMonster(position)
+            return level.randomMonster(position)
         }
 
         @Serializable
@@ -110,8 +110,21 @@ object LevelGeneration {
         override fun save() = SavedDefaultMonsterSpawner(saveId, level.saveId)
     }
 
-    private fun Level.defaultMonster(position: Position) =
-        Monster(this, position, 20, 100, 100, 10, UPSET)
+    private fun Level.randomMonster(position: Position) =
+        when (game.random.nextInt(3)) {
+            0 -> basicMonster(position)
+            1 -> upsetMonster(position)
+            else -> robotMonster(position)
+        }
+
+    private fun Level.basicMonster(position: Position) =
+        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, BASIC)
+
+    private fun Level.upsetMonster(position: Position) =
+        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, UPSET)
+
+    private fun Level.robotMonster(position: Position) =
+        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, ROBOT)
 
     fun generateSmallRoom(game: Game): Pair<Level, Position> {
         val level = Level(game, 1, array2D(3, 3) { _, _ ->
@@ -122,7 +135,7 @@ object LevelGeneration {
             pos.y != 0 || pos.x == 1
         }.second.type = STONE
 
-        level.createDefaultMonster(Position(2, 0))
+        level.createMonster(Position(2, 0))
 
         return level to Position(0, 0)
     }

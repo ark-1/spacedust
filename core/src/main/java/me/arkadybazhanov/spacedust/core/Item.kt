@@ -63,6 +63,9 @@ class HealKit(val game: Game, val hp: Int, override val saveId: Int = game.getNe
     }
 
     override fun process(owner: Character) {
+        if (game.withProbability(0.10)) {
+            owner.maxHp += 10
+        }
         owner.hp = minOf(owner.maxHp, owner.hp + hp)
     }
 }
