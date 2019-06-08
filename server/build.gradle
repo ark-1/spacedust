@@ -4,6 +4,11 @@ plugins {
 }
 
 mainClassName = "me.arkadybazhanov.spacedust.server.ServerKt"
+jar {
+    manifest {
+        attributes 'Main-Class': "me.arkadybazhanov.spacedust.server.ServerKt"
+    }
+}
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -21,12 +26,18 @@ repositories {
 
 compileKotlin {
     kotlinOptions.freeCompilerArgs += ['-Xuse-experimental=kotlin.Experimental']
-}
-
-compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs"
+    from(configurations.compile)
+}
+
+jar.mustRunAfter clean
+
+parent.stage.dependsOn(copyToLib)
