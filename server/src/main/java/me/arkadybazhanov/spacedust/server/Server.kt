@@ -39,7 +39,7 @@ fun main() {
         SchemaUtils.createMissingTablesAndColumns(Saves)
     }
 
-    val server = embeddedServer(Netty, 8080) {
+    val server = embeddedServer(Netty, System.getenv("PORT").toInt()) {
         routing {
             get("/get") {
 //                diagnose()
