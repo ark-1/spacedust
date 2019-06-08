@@ -2,6 +2,7 @@ package me.arkadybazhanov.spacedust
 
 import android.content.res.Resources
 import android.graphics.*
+import kotlinx.coroutines.*
 import me.arkadybazhanov.spacedust.LevelSnapshot.CellSnapshot
 import me.arkadybazhanov.spacedust.R.drawable.*
 import me.arkadybazhanov.spacedust.core.*
@@ -123,3 +124,7 @@ class LevelDrawer(private val resources: Resources) {
 }
 
 val Int.cell get() = this * LevelDrawer.CELL_WIDTH
+
+suspend inline fun fromUI(crossinline block: () -> Unit) = withContext(Dispatchers.Main) {
+    block()
+}

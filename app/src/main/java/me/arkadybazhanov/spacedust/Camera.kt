@@ -60,7 +60,7 @@ class Camera(private val width: Int, private val height: Int, playerX: Int, play
                 }
         }
 
-        withContext(Dispatchers.Main) {
+        fromUI {
             val animator = ObjectAnimator.ofFloat(
                 coordinateUpdater,
                 coordinateUpdater::x.name,

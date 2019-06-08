@@ -55,7 +55,7 @@ class MainActivity : Activity(), CoroutineScope {
 
         downloadButton.setOnClickListener {
             GlobalScope.launch {
-                withContext(Dispatchers.Main) {
+                fromUI {
                     downloadButton.isEnabled = false
                     uploadButton.isEnabled = false
                 }
@@ -78,7 +78,7 @@ class MainActivity : Activity(), CoroutineScope {
                     gameUpdater = GameUpdater(gameView, serializedState.restorePlayer(gameView))
                     gameView.camera.reset(gameUpdater.player.position.x, gameUpdater.player.position.y)
                 }
-                withContext(Dispatchers.Main) {
+                fromUI {
                     downloadButton.isEnabled = true
                     uploadButton.isEnabled = true
                     if (red) textError()
@@ -92,7 +92,7 @@ class MainActivity : Activity(), CoroutineScope {
 
         uploadButton.setOnClickListener {
             GlobalScope.launch {
-                withContext(Dispatchers.Main) {
+                fromUI {
                     downloadButton.isEnabled = false
                     uploadButton.isEnabled = false
                 }
@@ -107,7 +107,7 @@ class MainActivity : Activity(), CoroutineScope {
                     }
                 } ?: false
 
-                withContext(Dispatchers.Main) {
+                fromUI {
                     downloadButton.isEnabled = true
                     uploadButton.isEnabled = true
                     if (red) textError()
