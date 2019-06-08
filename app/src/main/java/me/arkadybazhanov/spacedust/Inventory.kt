@@ -10,7 +10,6 @@ import me.arkadybazhanov.spacedust.core.Weapon
 
 class Inventory : RecyclerView.Adapter<ItemHolder>() {
     private val _items: MutableList<Item> = mutableListOf()
-    private var bestWeaponIndex = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemHolder {
         val view = LayoutInflater
@@ -38,12 +37,7 @@ class Inventory : RecyclerView.Adapter<ItemHolder>() {
         override val size: Int get() = _items.size
         override fun add(index: Int, element: Item) = _items.add(index, element).also { notifyItemInserted(index) }
         override fun get(index: Int): Item = _items[index]
-        override fun removeAt(index: Int): Item = _items.removeAt(index).also {
-            if (_items.size == 0) {
-                bestWeaponIndex = -1
-            }
-            notifyItemRemoved(index)
-        }
+        override fun removeAt(index: Int): Item = _items.removeAt(index).also {notifyItemRemoved(index) }
         override fun set(index: Int, element: Item): Item = _items.set(index, element).also { notifyItemChanged(index) }
     }
 }

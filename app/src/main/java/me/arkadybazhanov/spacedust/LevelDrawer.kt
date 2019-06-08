@@ -89,7 +89,7 @@ class LevelDrawer(private val resources: Resources) {
             Monster::class -> when (monsterType) {
                 BASIC -> monster
                 UPSET -> upset
-                ROBOT -> robot
+                ANXIETY -> anxiety
                 else -> null
             }
             else -> null
