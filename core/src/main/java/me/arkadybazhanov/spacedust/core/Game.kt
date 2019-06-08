@@ -91,14 +91,10 @@ class Game(override val saveId: Int = 0, random: Random? = null) : Savable {
 
     }
 
-    val random = random ?: Random(seed)
+    val random = random ?: Random()
     fun withProbability(probability: Double) = random.nextDouble() < probability
 
     private fun serializeRandom(): String = ByteArrayOutputStream().apply {
         ObjectOutputStream(this).use { it.writeObject(random) }
     }.toByteArray().toString(Charsets.ISO_8859_1)
-
-    companion object {
-        private const val seed = 0L
-    }
 }
