@@ -118,12 +118,12 @@ object LevelGeneration {
         }
 
     private fun Level.basicMonster(position: Position) =
-        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, BASIC)
+        Monster(this, position, 30, 50 + difficulty * 20, strength = 10, type = BASIC)
 
     private fun Level.upsetMonster(position: Position) =
-        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, UPSET)
+        Monster(this, position, 20, 100 + difficulty * 25, strength = 10, type = UPSET)
 
     private fun Level.anxietyMonster(position: Position) =
-        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, ANXIETY)
+        Monster(this, position, 20, 50 + difficulty * 20, strength = 15, type = ANXIETY)
 
 }

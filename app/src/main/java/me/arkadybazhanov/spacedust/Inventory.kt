@@ -21,7 +21,6 @@ class Inventory : RecyclerView.Adapter<ItemHolder>() {
     override fun getItemCount(): Int = _items.size
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
-        println(position)
         val text = _items[position].name +
                 (_items[position] as? Weapon)?.let {
                     " (damage: ${it.damage})"

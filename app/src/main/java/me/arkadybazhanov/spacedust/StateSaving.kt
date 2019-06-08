@@ -83,7 +83,6 @@ suspend fun saveToServer(state: SerializedState, name: String, client: HttpClien
     client.call(BuildConfig.serverUrl + "/save") {
         method = HttpMethod.Post
         parameter("name", name)
-        println(url.build())
         body = FormDataContent(Parameters.build {
             append("save", content)
         })
