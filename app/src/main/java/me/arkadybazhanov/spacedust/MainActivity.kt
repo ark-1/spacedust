@@ -52,9 +52,6 @@ class MainActivity : Activity(), CoroutineScope {
             editText.setHintTextColor(Color.rgb(128, 128, 128))
             false
         }
-        editText.setOnFocusChangeListener { v, hasFocus ->
-            println("focus $hasFocus")
-        }
 
         downloadButton.setOnClickListener {
             GlobalScope.launch {

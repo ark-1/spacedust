@@ -1,11 +1,9 @@
 package me.arkadybazhanov.spacedust
 
-import android.graphics.*
+import android.graphics.Canvas
 import android.util.Log
 import android.view.SurfaceHolder
 import kotlinx.coroutines.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 object ViewUpdater {
 
@@ -39,7 +37,6 @@ object ViewUpdater {
             yield()
         }
     }
-
 
     private const val targetFps = 50
     private const val targetTimeMillis = 1000L / targetFps
