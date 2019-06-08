@@ -15,7 +15,7 @@ class Monster(
 ) : Character {
 
     enum class MonsterType {
-        BASIC, UPSET, ROBOT
+        BASIC, UPSET, ANXIETY
     }
 
     override val refs get() = inventory + (level as Savable)

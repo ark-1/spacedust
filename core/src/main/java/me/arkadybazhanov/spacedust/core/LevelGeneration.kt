@@ -81,7 +81,7 @@ object LevelGeneration {
             }
 
             level.withPosition().filter { (_, cell) -> cell.isEmpty() && cell.type in Monster.canStandIn }
-                .shuffled().first().second.type = DOWNSTAIRS
+                .shuffled(game.random).first().second.type = DOWNSTAIRS
 
             if (previousLevel != null) {
                 level[startPos].type = UPSTAIRS
@@ -114,7 +114,7 @@ object LevelGeneration {
         when (game.random.nextInt(3)) {
             0 -> basicMonster(position)
             1 -> upsetMonster(position)
-            else -> robotMonster(position)
+            else -> anxietyMonster(position)
         }
 
     private fun Level.basicMonster(position: Position) =
@@ -123,28 +123,7 @@ object LevelGeneration {
     private fun Level.upsetMonster(position: Position) =
         Monster(this, position, 20, 100 + difficulty * 10, 100, 10, UPSET)
 
-    private fun Level.robotMonster(position: Position) =
-        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, ROBOT)
+    private fun Level.anxietyMonster(position: Position) =
+        Monster(this, position, 20, 100 + difficulty * 10, 100, 10, ANXIETY)
 
-    fun generateSmallRoom(game: Game): Pair<Level, Position> {
-        val level = Level(game, 1, array2D(3, 3) { _, _ ->
-            Cell(AIR)
-        })
-
-        level.withPosition().shuffled(game.random).first { (pos, _) ->
-            pos.y != 0 || pos.x == 1
-        }.second.type = STONE
-
-        level.createMonster(Position(2, 0))
-
-        return level to Position(0, 0)
-    }
-
-    inline fun <T : Character> generateSmallRoomAndCreate(
-        game: Game,
-        characterSupplier: (Level, Position) -> T
-    ): Pair<Level, T> {
-        val (level, position) = generateSmallRoom(game)
-        return create(level, position, characterSupplier)
-    }
 }
