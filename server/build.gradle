@@ -8,6 +8,10 @@ jar {
     manifest {
         attributes 'Main-Class': "me.arkadybazhanov.spacedust.server.ServerKt"
     }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 dependencies {
@@ -33,11 +37,11 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-task copyToLib(type: Copy) {
-    into "$buildDir/libs"
-    from(configurations.compile)
-}
+//task copyToLib(type: Copy) {
+//    into "$buildDir/libs"
+//    from(configurations.compile)
+//}
 
 jar.mustRunAfter clean
 
-parent.stage.dependsOn(copyToLib)
+//parent.stage.dependsOn(copyToLib)
