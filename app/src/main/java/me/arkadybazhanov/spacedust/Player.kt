@@ -128,6 +128,7 @@ class Player(
         while (context is ContextWrapper) {
             if (context is Activity) {
                 (context as MainActivity).restart()
+                break
             }
             context = context.baseContext
         }

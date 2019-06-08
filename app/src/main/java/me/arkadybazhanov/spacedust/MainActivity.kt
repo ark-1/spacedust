@@ -11,6 +11,10 @@ import io.ktor.client.engine.android.Android
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.net.ConnectException
+import android.content.DialogInterface
+import android.app.AlertDialog
+import kotlin.coroutines.*
+
 
 class MainActivity : Activity(), CoroutineScope {
 
@@ -169,6 +173,16 @@ class MainActivity : Activity(), CoroutineScope {
         GlobalScope.launch {
             job.cancelAndJoin()
             job = Job()
+            fromUI {
+                suspendCoroutine<Unit> {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Death")
+                        .setMessage("You died.")
+                        .setPositiveButton("OK :(") { _, _ -> it.resume(Unit) }
+//                    .setIcon(android.R.drawable.s)
+                        .show()
+                }
+            }
             this@MainActivity.launch {
                 gameUpdater = GameUpdater(gameView, null)
                 gameView.camera.reset(gameUpdater.player.position.x, gameUpdater.player.position.y)

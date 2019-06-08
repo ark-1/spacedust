@@ -125,6 +125,6 @@ class LevelDrawer(private val resources: Resources) {
 
 val Int.cell get() = this * LevelDrawer.CELL_WIDTH
 
-suspend inline fun fromUI(crossinline block: () -> Unit) = withContext(Dispatchers.Main) {
+suspend inline fun fromUI(crossinline block: suspend () -> Unit) = withContext(Dispatchers.Main) {
     block()
 }
